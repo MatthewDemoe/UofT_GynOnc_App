@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>769270104236-6iqacjmo87o3ek0i29fjp877qhf40u56.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.769270104236-6iqacjmo87o3ek0i29fjp877qhf40u56</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBxTxeOsH1TgfK8s5h7XHImY7xo1C1_28I</string>
+	<key>GCM_SENDER_ID</key>
+	<string>769270104236</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.uoftGynoncApp</string>
+	<key>PROJECT_ID</key>
+	<string>gyn-onc-test</string>
+	<key>STORAGE_BUCKET</key>
+	<string>gyn-onc-test.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:769270104236:ios:1a990e89f3708e98905f09</string>
+	<key>DATABASE_URL</key>
+	<string>https://gyn-onc-test.firebaseio.com</string>
+</dict>
+</plist>

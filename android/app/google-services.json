@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "769270104236",
+    "firebase_url": "https://gyn-onc-test.firebaseio.com",
+    "project_id": "gyn-onc-test",
+    "storage_bucket": "gyn-onc-test.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:769270104236:android:a0f41436ffec2c83905f09",
+        "android_client_info": {
+          "package_name": "com.example.uoft_gynonc_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "769270104236-8jiut2n3ne3mhrcuci93cic39ik086gf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgYouS3QnMORaFFYpW5rzLlVcpdvO414c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "769270104236-8jiut2n3ne3mhrcuci93cic39ik086gf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "769270104236-6iqacjmo87o3ek0i29fjp877qhf40u56.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.uoftGynoncApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
