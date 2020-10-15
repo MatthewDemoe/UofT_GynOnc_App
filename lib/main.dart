@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'HomePage.dart';
@@ -7,8 +8,14 @@ import 'VideoPage.dart';
 import 'LoadingScreen.dart';
 
 Future<void> main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  FirebaseAuth mAuth = FirebaseAuth.instance; 
+    if(mAuth.currentUser == null)
+      await mAuth.signInAnonymously();
+
   runApp(MyApp());
 }
 
@@ -43,7 +50,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => HomePage(title: "Gyn Onc"),
         '/video': (context) => VideoPage(
-            title: "Video", url: 'https://www.youtube.com/watch?v=5yx6BWlEVcY'),
+            title: "Video", id: '5yx6BWlEVcY'),
       },
     );
   }

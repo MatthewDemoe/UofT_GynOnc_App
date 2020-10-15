@@ -26,6 +26,7 @@ class _HomePageState extends State<HomePage> {
         height: size.height,
         width: size.width,
         child: ListView(
+          physics: BouncingScrollPhysics(),
           //mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             categoryModules,

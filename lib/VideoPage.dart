@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoPage extends StatelessWidget {
-  VideoPage({Key key, this.title, this.url}) : super(key: key);
+  VideoPage({Key key, this.title, this.id}) : super(key: key);
 
   final String title;
-  final String url;
+  final String id;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class VideoPage extends StatelessWidget {
               Expanded(
                 child: YoutubePlayer(
                   controller: YoutubePlayerController(
-                      initialVideoId: '5yx6BWlEVcY',
+                      initialVideoId: id,
                       flags: YoutubePlayerFlags(autoPlay: false)),
                 ),
               ),

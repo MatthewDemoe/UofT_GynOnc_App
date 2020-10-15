@@ -1,32 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'VideoPage.dart';
 
-/*LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints viewportConstraints) {
-      return SingleChildScrollView(
-          physics: BouncingScrollPhysics(),
-          scrollDirection: Axis.vertical,
-          child: ConstrainedBox(
-            constraints:
-                BoxConstraints(minHeight: viewportConstraints.maxHeight),
-            //alignment: Alignment.topCenter,
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection(modulesToLoad)
-                  .snapshots(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (!snapshot.hasData) return new Text('Modules Not Found');
-                return new Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: getModuleButtons(snapshot, context),
-                );
-              },
-            ),
-          ));
-    });*/
 class CategoryModules extends StatelessWidget {
   CategoryModules(
       {String collectionLocation =
@@ -50,8 +26,17 @@ class CategoryModules extends StatelessWidget {
   }
 
   List<Widget> getModuleButtons(
-      AsyncSnapshot<QuerySnapshot> snapshot, BuildContext context) {
+      AsyncSnapshot<QuerySnapshot> snapshot, BuildContext context) {   
     return snapshot.data.docs.map((doc) {
+      String _imageUrl;
+      
+      var ref = FirebaseStorage.instance.ref().child(doc.data()['icon']);
+
+      ref.getDownloadURL().then((loc) => (() {
+        _imageUrl = loc;
+        print(' image' + _imageUrl);
+        } ));
+
       return new Container(
         alignment: Alignment.centerLeft,
         height: 120,
@@ -63,20 +48,19 @@ class CategoryModules extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               Container(
+                alignment: Alignment.centerLeft,
                 padding: EdgeInsets.symmetric(horizontal: 5),
-                child: Text(
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  child:Text(
                   doc.data()['name'],
+                  textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               Container(
                 alignment: Alignment.centerRight,
-                child: Image.network(
-                  "https://img.youtube.com/vi/5yx6BWlEVcY/0.jpg",
-                  height: 120,
-                  width: 220,
-                  fit: BoxFit.fitHeight,
-                ),
+                child: _imageUrl == null ? Image.network("https://img.youtube.com/vi/5yx6BWlEVcY/0.jpg", height: 110.0,)
+                :Image.network(_imageUrl,fit: BoxFit.cover,)
               ),
             ],
           ),
@@ -85,8 +69,7 @@ class CategoryModules extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                     builder: (context) => VideoPage(
-                          title: 'Video',
-                          url: 'https://www.youtube.com/watch?v=5yx6BWlEVcY',
+                          title: 'Video', id: '5yx6BWlEVcY',
                         )));
           },
           shape: RoundedRectangleBorder(
@@ -95,5 +78,5 @@ class CategoryModules extends StatelessWidget {
         ),
       );
     }).toList();
-  }
+  }  
 }
