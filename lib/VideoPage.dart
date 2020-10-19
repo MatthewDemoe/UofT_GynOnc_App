@@ -9,11 +9,7 @@ class VideoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(title),
-        ),
-        body: Column(
+    return  Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               Expanded(
@@ -23,6 +19,6 @@ class VideoPage extends StatelessWidget {
                       flags: YoutubePlayerFlags(autoPlay: false)),
                 ),
               ),
-            ]));
+            ]);
   }
 }
