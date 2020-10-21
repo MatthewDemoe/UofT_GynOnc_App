@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'AnswerWidget.dart';
 
 enum SelectedAnswer { q1, q2, q3, q4 }
 
@@ -13,13 +14,21 @@ class QuestionWidget extends StatefulWidget {
   final QueryDocumentSnapshot doc;
   final int questionNum;
 
+  _QuestionWidgetState myState = new _QuestionWidgetState();
+
   @override
-  _QuestionWidgetState createState() => _QuestionWidgetState();
+  _QuestionWidgetState createState() => myState;
+
+  int evaluateAnswer() {
+    int tmp = myState.evaluateAnswer();
+    print('In Widget: ' + tmp.toString());
+    return tmp;
+  }
 }
 
 class _QuestionWidgetState extends State<QuestionWidget> {
-  bool _isRadioSelected = false;
   SelectedAnswer selectedAnswer = SelectedAnswer.q1;
+  List<AnswerWidget> answerTiles = new List<AnswerWidget>();
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +57,9 @@ class _QuestionWidgetState extends State<QuestionWidget> {
               );
             }
 
+            answerTiles = formAnswers(snapshot);
             return Column(
-              children: formAnswers(snapshot),
+              children: answerTiles,
             );
           },
         )
@@ -61,17 +71,37 @@ class _QuestionWidgetState extends State<QuestionWidget> {
     int counter = -1;
     return snapshot.data.docs.map((answer) {
       counter++;
-
-      return RadioListTile<SelectedAnswer>(
-        title: Text(answer.data()['Answer']),
-        value: SelectedAnswer.values[counter],
-        groupValue: selectedAnswer,
-        onChanged: (SelectedAnswer value) {
-          setState(() {
-            selectedAnswer = value;
-          });
-        },
+      //print(answer.data()['isCorrect']);
+      return AnswerWidget(
+        answerTile: RadioListTile<SelectedAnswer>(
+          title: Text(answer.data()['Answer']),
+          value: SelectedAnswer.values[counter],
+          groupValue: selectedAnswer,
+          onChanged: (SelectedAnswer value) {
+            setState(() {
+              selectedAnswer = value;
+            });
+          },
+        ),
+        isCorrect: answer.data()['isCorrect'],
       );
     }).toList();
+  }
+
+  int evaluateAnswer() {
+    print(answerTiles.length);
+    int toReturn = 0;
+    answerTiles.forEach((element) {
+      if (element.isCorrect) {
+        if (element.answerTile.checked) {
+          print('Correct answer checked');
+          toReturn = 1;
+        } else {
+          print('Incorrect answer checked');
+        }
+      }
+    });
+    print('Returning 0');
+    return toReturn;
   }
 }

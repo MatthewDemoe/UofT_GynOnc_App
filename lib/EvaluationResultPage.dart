@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'QuestionWidget.dart';
+import 'EvaluationPage.dart';
 
-class EvaluationPage extends StatefulWidget {
-  EvaluationPage({Key key, this.title, this.doc}) : super(key: key);
+class EvaluationResultsPage extends StatefulWidget {
+  EvaluationResultsPage({Key key, this.evaluationPage}) : super(key: key);
 
-  final String title;
-  final QueryDocumentSnapshot doc;
+  final EvaluationPage evaluationPage;
 
   @override
-  _EvaluationPageState createState() => _EvaluationPageState();
+  _EvaluationResultsPageState createState() => _EvaluationResultsPageState();
 }
 
-class _EvaluationPageState extends State<EvaluationPage> {
+class _EvaluationResultsPageState extends State<EvaluationResultsPage> {
   List<QuestionWidget> theQuestions = new List<QuestionWidget>();
   List<Widget> theWidgets = new List<Widget>();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Container();
+    /*Scaffold(
         body: StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection(widget.doc.reference.collection('Questions').path)
@@ -45,24 +46,9 @@ class _EvaluationPageState extends State<EvaluationPage> {
                 'Submit',
                 style: TextStyle(fontSize: 28),
               ),
-              onPressed: () {
-                int correctAnswers = 0;
-
-                theQuestions.forEach((element) {
-                  //print(element.evaluateAnswer());
-                  int tmp = element.evaluateAnswer();
-                  correctAnswers += tmp;
-                  //setState(() {});
-                  /*setState(() {
-                    correctAnswers += tmp;
-                  });*/
-                  //correctAnswers += element.evaluateAnswer();
-                });
-                //print(correctAnswers.toDouble().toString());
-                print('Percent Correct: ' +
-                    (correctAnswers.toDouble() / theQuestions.length.toDouble())
-                        .toString());
-              },
+              onPressed: () => theQuestions.forEach((element) {
+                element.evaluate();
+              }),
             )));
 
         return ListView(
@@ -70,7 +56,7 @@ class _EvaluationPageState extends State<EvaluationPage> {
           children: theWidgets,
         );
       },
-    ));
+    ));*/
   }
 
   List<QuestionWidget> formQuestions(AsyncSnapshot<QuerySnapshot> snapshot) {
