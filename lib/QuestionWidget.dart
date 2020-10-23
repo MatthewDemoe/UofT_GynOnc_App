@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'AnswerWidget.dart';
 
-enum SelectedAnswer { q1, q2, q3, q4 }
+enum SelectedAnswer { q1, q2, q3, q4, q5, q6, q7, q8 }
 
 class QuestionWidget extends StatefulWidget {
   QuestionWidget({
@@ -14,7 +14,7 @@ class QuestionWidget extends StatefulWidget {
   final QueryDocumentSnapshot doc;
   final int questionNum;
 
-  _QuestionWidgetState myState = new _QuestionWidgetState();
+  final _QuestionWidgetState myState = new _QuestionWidgetState();
 
   @override
   _QuestionWidgetState createState() => myState;
@@ -24,9 +24,14 @@ class QuestionWidget extends StatefulWidget {
     print('In Widget: ' + tmp.toString());
     return tmp;
   }
+
+  void showAnswer() {
+    myState.showAnswer();
+  }
 }
 
 class _QuestionWidgetState extends State<QuestionWidget> {
+  bool hideAnswers = true;
   SelectedAnswer selectedAnswer = SelectedAnswer.q1;
   List<AnswerWidget> answerTiles = new List<AnswerWidget>();
 
@@ -69,23 +74,28 @@ class _QuestionWidgetState extends State<QuestionWidget> {
 
   List<Widget> formAnswers(AsyncSnapshot<QuerySnapshot> snapshot) {
     int counter = -1;
-    return snapshot.data.docs.map((answer) {
-      counter++;
-      //print(answer.data()['isCorrect']);
-      return AnswerWidget(
-        answerTile: RadioListTile<SelectedAnswer>(
-          title: Text(answer.data()['Answer']),
-          value: SelectedAnswer.values[counter],
-          groupValue: selectedAnswer,
-          onChanged: (SelectedAnswer value) {
-            setState(() {
-              selectedAnswer = value;
-            });
-          },
-        ),
-        isCorrect: answer.data()['isCorrect'],
-      );
-    }).toList();
+    if (snapshot.data != null) {
+      return snapshot.data.docs.map((answer) {
+        counter++;
+        print(answer.data()['isCorrect']);
+        return AnswerWidget(
+          answerTile: RadioListTile<SelectedAnswer>(
+            activeColor: hideAnswers
+                ? Colors.blue
+                : answer.data()['isCorrect'] ? Colors.green : Colors.red,
+            title: Text(answer.data()['Answer']),
+            value: SelectedAnswer.values[counter],
+            groupValue: selectedAnswer,
+            onChanged: (SelectedAnswer value) {
+              setState(() {
+                selectedAnswer = value;
+              });
+            },
+          ),
+          isCorrect: answer.data()['isCorrect'],
+        );
+      }).toList();
+    }
   }
 
   int evaluateAnswer() {
@@ -102,6 +112,13 @@ class _QuestionWidgetState extends State<QuestionWidget> {
       }
     });
     print('Returning 0');
+    showAnswer();
     return toReturn;
+  }
+
+  void showAnswer() {
+    setState(() {
+      hideAnswers = false;
+    });
   }
 }

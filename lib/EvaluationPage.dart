@@ -8,13 +8,20 @@ class EvaluationPage extends StatefulWidget {
   final String title;
   final QueryDocumentSnapshot doc;
 
+  final _EvaluationPageState myState = new _EvaluationPageState();
+
   @override
-  _EvaluationPageState createState() => _EvaluationPageState();
+  _EvaluationPageState createState() => myState;
+
+  List<QuestionWidget> getQuestions() {
+    return myState.theQuestions;
+  }
 }
 
 class _EvaluationPageState extends State<EvaluationPage> {
   List<QuestionWidget> theQuestions = new List<QuestionWidget>();
   List<Widget> theWidgets = new List<Widget>();
+  bool hideAnswers = true;
 
   @override
   Widget build(BuildContext context) {
@@ -31,39 +38,56 @@ class _EvaluationPageState extends State<EvaluationPage> {
           );
         }
 
-        theQuestions = formQuestions(snapshot);
+        if (hideAnswers) {
+          theQuestions = formQuestions(snapshot);
 
-        theQuestions.forEach((element) {
-          theWidgets.add(element);
-        });
-        theWidgets.add(Container(
-            padding: EdgeInsets.all(10),
-            height: 100,
-            width: 200,
-            child: RaisedButton(
-              child: Text(
-                'Submit',
-                style: TextStyle(fontSize: 28),
-              ),
-              onPressed: () {
-                int correctAnswers = 0;
+          theWidgets.addAll(theQuestions);
+          /*theQuestions.forEach((element) {
+            theWidgets.add(element);
+          });*/
 
-                theQuestions.forEach((element) {
-                  //print(element.evaluateAnswer());
-                  int tmp = element.evaluateAnswer();
-                  correctAnswers += tmp;
-                  //setState(() {});
-                  /*setState(() {
+          theWidgets.add(Container(
+              padding: EdgeInsets.all(10),
+              height: 100,
+              width: 200,
+              child: RaisedButton(
+                child: Text(
+                  'Submit',
+                  style: TextStyle(fontSize: 28),
+                ),
+                onPressed: () {
+                  int correctAnswers = 0;
+
+                  theQuestions.forEach((element) {
+                    int tmp = element.evaluateAnswer();
                     correctAnswers += tmp;
-                  });*/
-                  //correctAnswers += element.evaluateAnswer();
-                });
-                //print(correctAnswers.toDouble().toString());
-                print('Percent Correct: ' +
-                    (correctAnswers.toDouble() / theQuestions.length.toDouble())
-                        .toString());
-              },
-            )));
+                  });
+
+                  double percent = (correctAnswers.toDouble() /
+                      theQuestions.length.toDouble());
+
+                  setState(() {
+                    theWidgets.clear();
+                    theWidgets = new List<Widget>();
+                    hideAnswers = false;
+
+                    theWidgets.addAll(theQuestions);
+
+                    theWidgets.add(new Container(
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.only(
+                            left: 10, right: 10, top: 10, bottom: 50),
+                        child: Text(
+                          (percent * 100.0).round().toString() + '%',
+                          style: TextStyle(
+                              fontSize: 48,
+                              color: Color.lerp(
+                                  Colors.red, Colors.green, percent)),
+                        )));
+                  });
+                },
+              )));
+        }
 
         return ListView(
           physics: BouncingScrollPhysics(),
@@ -77,8 +101,8 @@ class _EvaluationPageState extends State<EvaluationPage> {
     int counter = 0;
     return snapshot.data.docs.map((question) {
       counter++;
+
       return QuestionWidget(
-        key: widget.key,
         doc: question,
         questionNum: counter,
       );
