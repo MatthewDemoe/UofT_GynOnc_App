@@ -11,38 +11,46 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+//This is the page that displays all the modules to the user
 class _HomePageState extends State<HomePage> {
   CategoryModules categoryModules = CategoryModules();
 
   @override
   Widget build(BuildContext context) {
+    //Size of the phone screen - appbar
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         elevation: 2,
         title: Text(widget.title),
       ),
+      //Body of the page contains a ListView of all the module buttons
       body: Container(
         height: size.height,
         width: size.width,
         child: ListView(
+          //Gives a nice bounce to the list when it is scrolled
           physics: BouncingScrollPhysics(),
           children: <Widget>[
             categoryModules,
           ],
         ),
       ),
+      //A drawer that can be pulled out from the side of the screen
       drawer: Drawer(
         child: StreamBuilder<QuerySnapshot>(
+            //Look in the database for each category of module we have
             stream: FirebaseFirestore.instance
                 .collection('module_categories')
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (!snapshot.hasData) return new Text('Modules Not Found');
+              //Return a progress indicator if we need to wait for data
+              if (!snapshot.hasData) return CircularProgressIndicator();
               List<Widget> drawer = [
                 Container(
                   height: 100.0,
+                  //Block that appears at the top of the drawer
                   child: DrawerHeader(
                     child: Text(
                       'Categories',
@@ -53,13 +61,16 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: Colors.cyan[700],
                     ),
                     margin: EdgeInsets.all(0),
                   ),
                 ),
               ];
+              //Add a button for each module category we found in the database
               drawer.addAll(getModuleCategories(snapshot).map((e) => e));
+
+              //Also add some additional buttons
               drawer.add(new ListTile(
                 title: Text('About'),
                 onTap: () {
@@ -79,20 +90,21 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  //Given a database snapshot, this will return a list tile for each collection in the database
   List<Widget> getModuleCategories(AsyncSnapshot<QuerySnapshot> snapshot) {
+    //Iterating through each document in the snapshot(each category)
     return snapshot.data.docs
         .map((doc) => new ListTile(
               title: new Text(doc.data()['name']),
               onTap: () {
                 setState(() {
                   Navigator.pop(context);
+                  //When you tap on a list tile, create a new list of buttons to be displayed
+                  //based on the category selected
                   categoryModules = CategoryModules(
-                      collectionLocation: doc.reference.path +
+                      modulesToLoad: doc.reference.path +
                           '/' +
                           doc.reference.collection('modules').id);
-                  print(doc.reference.path +
-                      '/' +
-                      doc.reference.collection('modules').id);
                 });
               },
             ))

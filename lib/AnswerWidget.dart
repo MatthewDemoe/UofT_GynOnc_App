@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//Extension of RadioListTile that also contains a bool for storing whether the answer is correct
 class AnswerWidget extends StatefulWidget {
   AnswerWidget({Key key, this.answerTile, this.isCorrect}) : super(key: key);
 

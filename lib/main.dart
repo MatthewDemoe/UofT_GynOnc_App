@@ -23,12 +23,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Gyn Onc',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: Colors.cyan[700],
+        primarySwatch: Colors.cyan,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => HomePage(title: "Gyn Onc"),
+        '/': (context) => HomePage(title: "Home Page"),
         '/video': (context) => VideoPage(title: "Video", id: '5yx6BWlEVcY'),
       },
     );

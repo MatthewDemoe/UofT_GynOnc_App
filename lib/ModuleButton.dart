@@ -7,7 +7,8 @@ import 'package:uoft_gynonc_app/ComponentDirector.dart';
 class ModuleButton extends StatelessWidget {
   ModuleButton({this.doc});
 
-  //final Container child;
+  //The document for this module
+  //Contains all the module information
   final QueryDocumentSnapshot doc;
 
   @override
@@ -17,10 +18,12 @@ class ModuleButton extends StatelessWidget {
       height: 120,
       width: MediaQuery.of(context).size.width,
       margin: EdgeInsets.all(10),
+      //The actual button
       child: RaisedButton(
         elevation: 10.0,
-        color: Colors.blue,
+        color: Colors.cyan[700],
         padding: EdgeInsets.all(5),
+        //The contents of the button, text and icon
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
@@ -28,32 +31,60 @@ class ModuleButton extends StatelessWidget {
               alignment: Alignment.center,
               padding: EdgeInsets.symmetric(horizontal: 5),
               width: MediaQuery.of(context).size.width * 0.66,
+              //Get the name of this module, stored in the firestore field 'name'
               child: Text(
                 doc.data()['name'],
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
               ),
             ),
+            //This is the icon on the right of the button
+            //The expanded type will let the icon fill up the correct amount of space
             Expanded(
-              //alignment: Alignment.centerRight,
+              //We need to asynchronosly build the icon because it is in firebase storage
               child: FutureBuilder(
                   builder: (context, snapshot) {
+                    //When we have the data
                     if (snapshot.connectionState == ConnectionState.done)
                       return Container(
-                        alignment: Alignment.center,
-                        height: 110.0,
-                        child: CircleAvatar(
-                          backgroundColor: Colors.white,
-                          radius: 110.0,
-                          child: snapshot.hasData
-                              ? snapshot.data
-                              : Image.network(
-                                  "https://img.youtube.com/vi/5yx6BWlEVcY/0.jpg",
-                                  height: 50.0,
+                          alignment: Alignment.center,
+                          height: 110.0,
+                          //Create the white circle, as well as the cyan and pink accents
+                          child: Stack(
+                            fit: StackFit.loose,
+                            //Overflow allows us to see the pink/cyan highlights
+                            //Otherwise they would be cut off
+                            overflow: Overflow.visible,
+                            alignment: Alignment.center,
+                            children: [
+                              Positioned(
+                                top: 5.0,
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.pink[400],
+                                  radius: 50.0,
                                 ),
-                        ),
-                      );
+                              ),
+                              Positioned(
+                                bottom: 5.0,
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.cyan[300],
+                                  radius: 50.0,
+                                ),
+                              ),
+                              CircleAvatar(
+                                backgroundColor: Colors.white,
+                                radius: 50.0,
+                                child: snapshot.hasData
+                                    ? snapshot.data
+                                    : CircularProgressIndicator(),
+                              ),
+                            ],
+                          ));
 
+                    //Display progress indicators while we are waiting for the icon
                     if (snapshot.connectionState == ConnectionState.waiting)
                       return Container(
                         height: 110.0,
@@ -61,12 +92,12 @@ class ModuleButton extends StatelessWidget {
                       );
 
                     return Container(
-                        height: 110.0,
-                        child: Image.network(
-                          "https://img.youtube.com/vi/5yx6BWlEVcY/0.jpg",
-                          height: 110.0,
-                        ));
+                      height: 110.0,
+                      child: CircularProgressIndicator(),
+                    );
                   },
+
+                  //The image we are waiting to receive
                   future: getImage(
                     context,
                     doc.data()['icon'],
@@ -74,13 +105,17 @@ class ModuleButton extends StatelessWidget {
             ),
           ],
         ),
+
+        //When we click the module button, we want to start exploring the contents
+        //ComponentDirector handles moving between different module components
         onPressed: () {
           Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => ComponentDirector(
-                        title: 'First Component', doc: doc,
-                        pageNum: 0, //id: '5yx6BWlEVcY',
+                        title: 'First',
+                        doc: doc,
+                        pageNum: 0,
                       )));
         },
         shape: RoundedRectangleBorder(
@@ -90,21 +125,18 @@ class ModuleButton extends StatelessWidget {
     );
   }
 
+  //Fetches the image we're looking for from firebase storage
   Future<Widget> getImage(BuildContext context, String image) async {
     Image img;
 
     await FirebaseStorage.instance
+        //The firebase storage instance
         .ref()
+        //get the reference to the image
         .child(image)
+        //Get the URL from the reference
         .getDownloadURL()
-        .then((value) {
-      print('DOWNLOAD URL: ' + (value as String));
-    });
-
-    await FirebaseStorage.instance
-        .ref()
-        .child(image)
-        .getDownloadURL()
+        //Get the actual image from the URL
         .then((value) => img = Image.network(
               value.toString(),
               fit: BoxFit.scaleDown,

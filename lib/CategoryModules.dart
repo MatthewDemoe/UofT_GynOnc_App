@@ -6,19 +6,16 @@ import 'ModuleButton.dart';
 
 class CategoryModules extends StatelessWidget {
   CategoryModules(
-      {String collectionLocation =
-          'module_categories/disease_modules/modules'}) {
-    modulesToLoad = collectionLocation;
-  }
+      {this.modulesToLoad = 'module_categories/disease_modules/modules'});
 
-  String modulesToLoad = 'module_categories/disease_modules/modules';
+  final String modulesToLoad;
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection(modulesToLoad).snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (!snapshot.hasData) return new Text('Modules Not Found');
+        if (!snapshot.hasData) return CircularProgressIndicator();
         return new Column(
           children: getModuleButtons(snapshot, context),
         );
@@ -27,9 +24,11 @@ class CategoryModules extends StatelessWidget {
   }
 
   List<Widget> getModuleButtons(
-      AsyncSnapshot<QuerySnapshot> snapshot, BuildContext context) {   
+      AsyncSnapshot<QuerySnapshot> snapshot, BuildContext context) {
     return snapshot.data.docs.map((doc) {
-      return new ModuleButton (doc: doc,);
+      return new ModuleButton(
+        doc: doc,
+      );
     }).toList();
-  }  
+  }
 }
