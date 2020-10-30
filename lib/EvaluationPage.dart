@@ -1,5 +1,7 @@
+import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/rendering.dart';
 import 'QuestionWidget.dart';
 
 class EvaluationPage extends StatefulWidget {
@@ -9,23 +11,23 @@ class EvaluationPage extends StatefulWidget {
   //The evaluation document in firebase
   final QueryDocumentSnapshot doc;
 
-  final _EvaluationPageState myState = new _EvaluationPageState();
-
   @override
-  _EvaluationPageState createState() => myState;
+  _EvaluationPageState createState() => new _EvaluationPageState();
 
-  List<QuestionWidget> getQuestions() {
-    return myState.theQuestions;
-  }
+  //Return the list of questions that is stored in the state of this widget
 }
 
 class _EvaluationPageState extends State<EvaluationPage> {
+  int currentQuestion = 0;
   //The list of question widgets in the evaluation
   List<QuestionWidget> theQuestions = new List<QuestionWidget>();
   //All widgets we will display, contains question widgets as well as other types of widgets
   List<Widget> theWidgets = new List<Widget>();
   //After the users submit their answers, we will show which are correct/incorrect
   bool hideAnswers = true;
+  int correctAnswers = 0;
+
+  List<int> evaluations = new List<int>();
 
   @override
   Widget build(BuildContext context) {
@@ -44,15 +46,11 @@ class _EvaluationPageState extends State<EvaluationPage> {
           );
         }
 
-        if (hideAnswers) {
-          //Create all the question widgets from the snapshot
-          theQuestions = formQuestions(snapshot);
+        theQuestions = formQuestions(snapshot);
 
-          //Add all the questions to the list
-          //the if statement we are in prevents them from being added twice
+        if (theWidgets.isEmpty) {
           theWidgets.addAll(theQuestions);
 
-          //Also add the submit button
           theWidgets.add(Container(
               padding: EdgeInsets.all(10),
               height: 100,
@@ -70,14 +68,16 @@ class _EvaluationPageState extends State<EvaluationPage> {
                 //Evaluate each answer when we click submit
                 onPressed: () {
                   //initialize the amount of correct answers
-                  int correctAnswers = 0;
-
-                  //Iterate through each question
                   theQuestions.forEach((element) {
+                    element.showAnswers();
+                  });
+                  //Iterate through each question
+                  evaluations.forEach((element) {
                     //Evaluate the submitter answer, will return 1 if correct, 0 if incorrect
-                    int tmp = element.evaluateAnswer();
+                    //int tmp = element.evaluateAnswer();
+
                     //Count the correct answers
-                    correctAnswers += tmp;
+                    correctAnswers += element;
                   });
                   //Calculate the percentage of correct answers
                   double percent = (correctAnswers.toDouble() /
@@ -112,10 +112,12 @@ class _EvaluationPageState extends State<EvaluationPage> {
               )));
         }
 
-        return ListView(
-          physics: BouncingScrollPhysics(),
-          children: theWidgets,
-        );
+        return CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
+          SliverList(
+              delegate: SliverChildListDelegate(
+            theWidgets,
+          ))
+        ]);
       },
     ));
   }
@@ -125,12 +127,20 @@ class _EvaluationPageState extends State<EvaluationPage> {
     //this is just used to add a number at the beginning of the question's text
     int counter = 0;
     return snapshot.data.docs.map((question) {
-      counter++;
+      counter = counter + 1;
 
-      return QuestionWidget(
+      QuestionWidget tmp = QuestionWidget(
         doc: question,
         questionNum: counter,
       );
+
+      evaluations.add(0);
+
+      tmp.evaluationEvent.subscribe((args) {
+        evaluations[tmp.questionNum - 1] = args.value;
+      });
+
+      return tmp;
     }).toList();
   }
 }

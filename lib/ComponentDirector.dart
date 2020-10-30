@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'VideoPage.dart';
 import 'EvaluationPage.dart';
+import 'ReadingPage.dart';
 
 //Widget for navigating through components of a module
 class ComponentDirector extends StatefulWidget {
@@ -69,7 +70,9 @@ class _ComponentDirectorState extends State<ComponentDirector> {
                   //Total pages
                   numPages.toString(),
             ),
+            //Other buttons in the appbar
             actions: [
+              //Display a back button if we arent' on the first page
               if (widget.pageNum > 0)
                 IconButton(
                     icon: Icon(Icons.arrow_back),
@@ -77,6 +80,7 @@ class _ComponentDirectorState extends State<ComponentDirector> {
                       Navigator.pop(context);
                       Navigator.push(
                         context,
+                        //The button will return us to the previous page in the list
                         MaterialPageRoute(
                             builder: (context) => ComponentDirector(
                                   title: widget.title,
@@ -85,6 +89,7 @@ class _ComponentDirectorState extends State<ComponentDirector> {
                                 )),
                       );
                     }),
+              //Display a forward arrow if we aren't on the last page
               if (widget.pageNum < (numPages - 1))
                 IconButton(
                     icon: Icon(Icons.arrow_forward),
@@ -92,6 +97,7 @@ class _ComponentDirectorState extends State<ComponentDirector> {
                       Navigator.pop(context);
                       Navigator.push(
                         context,
+                        //The button will take us to the next page in the list
                         MaterialPageRoute(
                             builder: (context) => ComponentDirector(
                                   title: widget.title,
@@ -117,6 +123,14 @@ class _ComponentDirectorState extends State<ComponentDirector> {
         return new VideoPage(
             id: doc.data()['Video ID'], title: doc.data()['Video ID']);
       }
+
+      if (doc.id.contains('Reading')) {
+        return new ReadingPage(
+          title: doc.data()['Title'],
+          doc: doc,
+        );
+      }
+
       //If this document has 'evaluation' in the name, create an ecaluation page from its contents
       if (doc.id.contains('Evaluation')) {
         return new EvaluationPage(

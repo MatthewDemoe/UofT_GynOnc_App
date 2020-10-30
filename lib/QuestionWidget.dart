@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'AnswerWidget.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:event/event.dart';
 
-//This is not the most elegant solution, but I don't see another solution at the moment
-//Enums to represent each answer in a multiple-choice question
-enum SelectedAnswer { q1, q2, q3, q4, q5, q6, q7, q8 }
+import 'AnswerWidget.dart';
 
 class QuestionWidget extends StatefulWidget {
   QuestionWidget({
@@ -13,29 +12,32 @@ class QuestionWidget extends StatefulWidget {
     this.questionNum,
   }) : super(key: key);
 
+  final evaluationEvent = Event<ValueEventArgs>();
+  final showAnswerEvent = Event();
+
   //The question document we are building from
   final QueryDocumentSnapshot doc;
   //The question number we are on
   final int questionNum;
 
-  final _QuestionWidgetState myState = new _QuestionWidgetState();
+  void showAnswers() {
+    print('BEFORE BROADCAST');
+    showAnswerEvent.broadcast();
+  }
 
-  @override
-  _QuestionWidgetState createState() => myState;
+  _QuestionWidgetState createState() => _QuestionWidgetState();
 
   //Evaluate answer based on state of this widget
   //Returns 1 for correct answers or 0 for incorrect
   int evaluateAnswer() {
-    int tmp = myState.evaluateAnswer();
-    return tmp;
-  }
-
-  void showAnswer() {
-    myState.showAnswer();
+    return 0;
+    //int tmp = evaluateAnswer();
+    //return tmp;
   }
 }
 
-class _QuestionWidgetState extends State<QuestionWidget> {
+class _QuestionWidgetState extends State<QuestionWidget>
+    with AutomaticKeepAliveClientMixin {
   //Should we show the user the correct answer?
   bool hideAnswers = true;
   //Initialize the currently selected answer
@@ -43,12 +45,60 @@ class _QuestionWidgetState extends State<QuestionWidget> {
   //A list of all the possible answers for this question
   List<AnswerWidget> answerTiles = new List<AnswerWidget>();
 
+  bool wantKeepAlive = true;
+
+  //Returns a list of answer widgets for this question
+
+  @override
+  initState() {
+    super.initState();
+
+    //selectedAnswer = SelectedAnswer.q1;
+    print('BEFORE SUBSCRIBE : ' + hideAnswers.toString());
+    widget.showAnswerEvent.subscribe((args) {
+      /*if (!mounted) {
+        print(widget.questionNum);
+        return;
+      }*/
+      print('BEFORE UNHIDING IN QUESTION : ' + widget.questionNum.toString());
+
+      setState(() {
+        print('UNHIDING IN QUESTION WIDGET');
+        hideAnswers = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Container(
       padding: EdgeInsets.all(10),
       //Arrange questions in a column
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        if (widget.doc.data().keys.contains('Image'))
+          FutureBuilder(
+              future: getImage(context, widget.doc.data()['Image']),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting)
+                  return Container(
+                    height: 110.0,
+                    child: CircularProgressIndicator(),
+                  );
+
+                if (snapshot.connectionState == ConnectionState.done)
+                  return Container(
+                      padding: EdgeInsets.all(10),
+                      child: snapshot.hasData
+                          ? snapshot.data
+                          : CircularProgressIndicator());
+
+                return Container(
+                  height: 110.0,
+                  child: CircularProgressIndicator(),
+                );
+              }),
+
         Container(
             padding: EdgeInsets.all(10),
             child: Text(
@@ -76,6 +126,10 @@ class _QuestionWidgetState extends State<QuestionWidget> {
             }
 
             answerTiles = formAnswers(snapshot);
+
+            //Initial evaluation
+            widget.evaluationEvent.broadcast(ValueEventArgs(evaluateAnswer()));
+
             return Column(
               children: answerTiles,
             );
@@ -85,36 +139,8 @@ class _QuestionWidgetState extends State<QuestionWidget> {
     );
   }
 
-  //Create a list of answer widgets for this question
-  List<Widget> formAnswers(AsyncSnapshot<QuerySnapshot> snapshot) {
-    //Initialize an answer counter, used to set the enum value of each question
-    int counter = -1;
-    if (snapshot.data != null) {
-      return snapshot.data.docs.map((answer) {
-        counter++;
-        return AnswerWidget(
-          answerTile: RadioListTile<SelectedAnswer>(
-            //If we are hiding the answers, display the radio button as blue
-            activeColor: hideAnswers
-                ? Colors.blue
-                //If we are not hiding the answers, display radio buttons as either red or green
-                : answer.data()['isCorrect'] ? Colors.green : Colors.red,
-            //The text the answer widget will display
-            title: Text(answer.data()['Answer']),
-            value: SelectedAnswer.values[counter],
-            groupValue: selectedAnswer,
-            onChanged: (SelectedAnswer value) {
-              setState(() {
-                selectedAnswer = value;
-              });
-            },
-          ),
-          isCorrect: answer.data()['isCorrect'],
-        );
-      }).toList();
-    }
-  }
-
+  //Returns 1 if the correct answer is selected, otherwise returns 0
+  //Also shows answers
   int evaluateAnswer() {
     int toReturn = 0;
     answerTiles.forEach((element) {
@@ -124,13 +150,71 @@ class _QuestionWidgetState extends State<QuestionWidget> {
         } else {}
       }
     });
-    showAnswer();
+
+    //hideAnswers = false;
     return toReturn;
   }
 
-  void showAnswer() {
-    setState(() {
-      hideAnswers = false;
-    });
+  List<Widget> formAnswers(AsyncSnapshot<QuerySnapshot> snapshot) {
+    //Initialize an answer counter, used to set the enum value of each question
+    int counter = -1;
+    if (snapshot.data != null) {
+      List<Widget> answers = snapshot.data.docs.map((doc) {
+        counter++;
+        return AnswerWidget(
+          answer: doc,
+          //is this the correct answer?
+          isCorrect: doc.data()['isCorrect'],
+          answerTile: RadioListTile<SelectedAnswer>(
+            //If we are hiding the answers, display the radio button as blue
+            activeColor: hideAnswers
+                ? Colors.blue
+                //If we are not hiding the answers, display radio buttons as either red or green
+                : doc.data()['isCorrect'] ? Colors.green : Colors.red,
+            //The text the answer widget will display
+            title: Text(doc.data()['Answer']),
+            //The enum value this answer represents
+            value: SelectedAnswer.values[counter],
+            //the enum variable
+            groupValue: selectedAnswer,
+            //Change the selected answer to whatever was clicked on
+            onChanged: (SelectedAnswer value) {
+              setState(() {
+                selectedAnswer = value;
+              });
+              widget.evaluationEvent
+                  .broadcast(ValueEventArgs(evaluateAnswer()));
+            },
+          ),
+        );
+      }).toList();
+
+      return answers;
+    }
   }
+
+  Future<Widget> getImage(BuildContext context, String image) async {
+    Image img;
+
+    await FirebaseStorage.instance
+        //The firebase storage instance
+        .ref()
+        //get the reference to the image
+        .child(image)
+        //Get the URL from the reference
+        .getDownloadURL()
+        //Get the actual image from the URL
+        .then((value) => img = Image.network(
+              value.toString(),
+              fit: BoxFit.scaleDown,
+            ));
+
+    return img;
+  }
+}
+
+class ValueEventArgs extends EventArgs {
+  int value;
+
+  ValueEventArgs(this.value);
 }
