@@ -45,6 +45,8 @@ class _QuestionWidgetState extends State<QuestionWidget>
   //A list of all the possible answers for this question
   List<AnswerWidget> answerTiles = new List<AnswerWidget>();
 
+  Widget img;
+
   bool wantKeepAlive = true;
 
   //Returns a list of answer widgets for this question
@@ -52,18 +54,33 @@ class _QuestionWidgetState extends State<QuestionWidget>
   @override
   initState() {
     super.initState();
+    //Load the image in once, so that we don't keep reading from the database
+    //Each time the widget is built
+    if (widget.doc.data().keys.contains('Image'))
+      img = FutureBuilder(
+          future: getImage(context, widget.doc.data()['Image']),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting)
+              return Container(
+                height: 110.0,
+                child: CircularProgressIndicator(),
+              );
 
-    //selectedAnswer = SelectedAnswer.q1;
-    print('BEFORE SUBSCRIBE : ' + hideAnswers.toString());
+            if (snapshot.connectionState == ConnectionState.done)
+              return Container(
+                  padding: EdgeInsets.all(10),
+                  child: snapshot.hasData
+                      ? snapshot.data
+                      : CircularProgressIndicator());
+
+            return Container(
+              height: 110.0,
+              child: CircularProgressIndicator(),
+            );
+          });
+
     widget.showAnswerEvent.subscribe((args) {
-      /*if (!mounted) {
-        print(widget.questionNum);
-        return;
-      }*/
-      print('BEFORE UNHIDING IN QUESTION : ' + widget.questionNum.toString());
-
       setState(() {
-        print('UNHIDING IN QUESTION WIDGET');
         hideAnswers = false;
       });
     });
@@ -76,28 +93,7 @@ class _QuestionWidgetState extends State<QuestionWidget>
       padding: EdgeInsets.all(10),
       //Arrange questions in a column
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (widget.doc.data().keys.contains('Image'))
-          FutureBuilder(
-              future: getImage(context, widget.doc.data()['Image']),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting)
-                  return Container(
-                    height: 110.0,
-                    child: CircularProgressIndicator(),
-                  );
-
-                if (snapshot.connectionState == ConnectionState.done)
-                  return Container(
-                      padding: EdgeInsets.all(10),
-                      child: snapshot.hasData
-                          ? snapshot.data
-                          : CircularProgressIndicator());
-
-                return Container(
-                  height: 110.0,
-                  child: CircularProgressIndicator(),
-                );
-              }),
+        if (widget.doc.data().keys.contains('Image')) img,
 
         Container(
             padding: EdgeInsets.all(10),
