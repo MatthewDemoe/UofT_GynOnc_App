@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'HelperFunctions.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ReadingPage extends StatelessWidget {
   ReadingPage({this.title = 'Reading', this.doc});

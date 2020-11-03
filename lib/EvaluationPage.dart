@@ -1,8 +1,9 @@
-import 'package:event/event.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/rendering.dart';
 import 'QuestionWidget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EvaluationPage extends StatefulWidget {
   EvaluationPage({Key key, this.title, this.doc}) : super(key: key);
@@ -98,7 +99,7 @@ class _EvaluationPageState extends State<EvaluationPage> {
                     theWidgets.add(new Container(
                         alignment: Alignment.center,
                         padding: EdgeInsets.only(
-                            left: 10, right: 10, top: 10, bottom: 50),
+                            left: 10, right: 10, top: 10, bottom: 10),
                         child: Text(
                           (percent * 100.0).round().toString() + '%',
                           style: TextStyle(
@@ -107,6 +108,19 @@ class _EvaluationPageState extends State<EvaluationPage> {
                               color: Color.lerp(
                                   Colors.red, Colors.green, percent)),
                         )));
+
+                    theWidgets.add(Container(
+                      padding: EdgeInsets.only(bottom: 25),
+                      child: RichText(
+                      textAlign: TextAlign.center,
+                      text: new TextSpan(children: [
+                      TextSpan(text: 'Click ', style: TextStyle(color: Colors.black, fontSize: 18)), 
+                      TextSpan(text: 'here', 
+                        style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline, fontSize: 18), 
+                        recognizer: TapGestureRecognizer()..onTap = (){launch(widget.doc.data()['Link']);}), 
+                      TextSpan(text: ' for further reading.', style: TextStyle(color: Colors.black, fontSize: 18)), 
+
+                    ]))));
                   });
                 },
               )));
