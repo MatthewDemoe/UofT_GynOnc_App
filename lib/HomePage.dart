@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'CategoryModules.dart';
 
 class HomePage extends StatefulWidget {
@@ -14,6 +15,18 @@ class HomePage extends StatefulWidget {
 //This is the page that displays all the modules to the user
 class _HomePageState extends State<HomePage> {
   CategoryModules categoryModules = CategoryModules();
+
+  Widget header;
+
+  @override
+  void initState() {
+    super.initState();
+
+    header = Container(
+        padding: EdgeInsets.all(8),
+        height: 150,
+        child: buildImage('GynOnc_Logo.png'));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +44,8 @@ class _HomePageState extends State<HomePage> {
         child: ListView(
           //Gives a nice bounce to the list when it is scrolled
           physics: BouncingScrollPhysics(),
-          children: <Widget>[
+          children: [
+            header,
             categoryModules,
           ],
         ),
@@ -49,17 +63,18 @@ class _HomePageState extends State<HomePage> {
               if (!snapshot.hasData) return CircularProgressIndicator();
               List<Widget> drawer = [
                 Container(
-                  height: 100.0,
+                  //height: 100.0,
                   //Block that appears at the top of the drawer
                   child: DrawerHeader(
-                    child: Text(
+                    child: header,
+                    /*Text(
                       'Categories',
                       textAlign: TextAlign.left,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
                       ),
-                    ),
+                    ),*/
                     decoration: BoxDecoration(
                       color: Colors.cyan[700],
                     ),

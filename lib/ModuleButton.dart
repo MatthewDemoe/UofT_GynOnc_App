@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'HelperFunctions.dart';
 import 'package:uoft_gynonc_app/ComponentDirector.dart';
 
 class ModuleButton extends StatelessWidget {
@@ -38,7 +38,7 @@ class ModuleButton extends StatelessWidget {
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                    color: Colors.white),
               ),
             ),
             //This is the icon on the right of the button
@@ -99,7 +99,6 @@ class ModuleButton extends StatelessWidget {
 
                   //The image we are waiting to receive
                   future: getImage(
-                    context,
                     doc.data()['icon'],
                   )),
             ),
@@ -123,25 +122,5 @@ class ModuleButton extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  //Fetches the image we're looking for from firebase storage
-  Future<Widget> getImage(BuildContext context, String image) async {
-    Image img;
-
-    await FirebaseStorage.instance
-        //The firebase storage instance
-        .ref()
-        //get the reference to the image
-        .child(image)
-        //Get the URL from the reference
-        .getDownloadURL()
-        //Get the actual image from the URL
-        .then((value) => img = Image.network(
-              value.toString(),
-              fit: BoxFit.scaleDown,
-            ));
-
-    return img;
   }
 }
