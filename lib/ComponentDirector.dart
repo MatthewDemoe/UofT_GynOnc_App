@@ -40,6 +40,7 @@ class _ComponentDirectorState extends State<ComponentDirector> {
         if (!snapshot.hasData)
           return new Container(
             height: 110.0,
+            width: 110.0,
             //While we wait for data...
             child: CircularProgressIndicator(),
           );

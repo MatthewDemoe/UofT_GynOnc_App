@@ -88,11 +88,13 @@ class ModuleButton extends StatelessWidget {
                     if (snapshot.connectionState == ConnectionState.waiting)
                       return Container(
                         height: 110.0,
+                        width: 110.0,
                         child: CircularProgressIndicator(),
                       );
 
                     return Container(
                       height: 110.0,
+                      width: 110.0,
                       child: CircularProgressIndicator(),
                     );
                   },

@@ -63,30 +63,6 @@ class _QuestionWidgetState extends State<QuestionWidget>
         hideAnswers = false;
       });
     });
-    /*FutureBuilder(
-        future: getImage(widget.doc.data()['Image']),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting)
-            return Container(
-              height: 110.0,
-              child: CircularProgressIndicator(),
-            );
-
-          if (snapshot.connectionState == ConnectionState.done)
-            return Container(
-                padding: EdgeInsets.all(10),
-                child: snapshot.hasData
-                    ? snapshot.data
-                    : CircularProgressIndicator());
-
-          return Container(
-            height: 110.0,
-            child: CircularProgressIndicator(),
-          );
-        });
-
-    
-    });*/
   }
 
   @override
@@ -119,6 +95,7 @@ class _QuestionWidgetState extends State<QuestionWidget>
             if (!snapshot.hasData) {
               return Container(
                 height: 110.0,
+                width: 110.0,
                 //while we wait...
                 child: CircularProgressIndicator(),
               );

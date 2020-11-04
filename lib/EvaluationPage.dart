@@ -27,6 +27,10 @@ class _EvaluationPageState extends State<EvaluationPage> {
   //After the users submit their answers, we will show which are correct/incorrect
   bool hideAnswers = true;
   int correctAnswers = 0;
+  double percent = 0;
+
+  Widget submitButton;
+  List<Widget> mark = new List<Widget>();
 
   List<int> evaluations = new List<int>();
 
@@ -42,6 +46,7 @@ class _EvaluationPageState extends State<EvaluationPage> {
         if (!snapshot.hasData) {
           return Container(
             height: 110.0,
+            width: 110.0,
             //While we wait...
             child: CircularProgressIndicator(),
           );
@@ -51,8 +56,7 @@ class _EvaluationPageState extends State<EvaluationPage> {
 
         if (theWidgets.isEmpty) {
           theWidgets.addAll(theQuestions);
-
-          theWidgets.add(Container(
+          submitButton = Container(
               padding: EdgeInsets.all(10),
               height: 100,
               width: 200,
@@ -74,29 +78,20 @@ class _EvaluationPageState extends State<EvaluationPage> {
                   });
                   //Iterate through each question
                   evaluations.forEach((element) {
-                    //Evaluate the submitter answer, will return 1 if correct, 0 if incorrect
-                    //int tmp = element.evaluateAnswer();
-
                     //Count the correct answers
-                    correctAnswers += element;
+                  correctAnswers += element;
                   });
                   //Calculate the percentage of correct answers
-                  double percent = (correctAnswers.toDouble() /
-                      theQuestions.length.toDouble());
+
 
                   setState(() {
-                    //Clear widgets on the page(we just want to get rid of the submit button )
-                    theWidgets.clear();
-                    theWidgets = new List<Widget>();
+                      percent = (correctAnswers.toDouble() /
+                      theQuestions.length.toDouble());
 
                     //Stop hiding correct answers
-                    hideAnswers = false;
-
-                    //Add the questions back
-                    theWidgets.addAll(theQuestions);
-
-                    //Add a widget showing the evaluation results
-                    theWidgets.add(new Container(
+                    hideAnswers = false;                    
+                  });
+                  mark.add(new Container(
                         alignment: Alignment.center,
                         padding: EdgeInsets.only(
                             left: 10, right: 10, top: 10, bottom: 10),
@@ -109,7 +104,7 @@ class _EvaluationPageState extends State<EvaluationPage> {
                                   Colors.red, Colors.green, percent)),
                         )));
 
-                    theWidgets.add(Container(
+                    mark.add(Container(
                       padding: EdgeInsets.only(bottom: 25),
                       child: RichText(
                       textAlign: TextAlign.center,
@@ -121,15 +116,15 @@ class _EvaluationPageState extends State<EvaluationPage> {
                       TextSpan(text: ' for further reading.', style: TextStyle(color: Colors.black, fontSize: 18)), 
 
                     ]))));
-                  });
                 },
-              )));
+              ));
         }
 
         return CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
           SliverList(
-              delegate: SliverChildListDelegate(
-            theWidgets,
+              delegate: SliverChildListDelegate( 
+
+           theWidgets + ((hideAnswers) ? [submitButton] : mark)
           ))
         ]);
       },
