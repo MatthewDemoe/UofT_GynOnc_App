@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:uoft_gynonc_app/LoadingScreen.dart';
 import 'SignInPage.dart';
 import 'HomePage.dart';
 import 'VideoPage.dart';
@@ -10,8 +11,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  FirebaseAuth mAuth = FirebaseAuth.instance;
-  if (mAuth.currentUser == null) await mAuth.signInAnonymously();
+  //FirebaseAuth mAuth = FirebaseAuth.instance;
+  // if (mAuth.currentUser == null) await mAuth.signInAnonymously();
 
   runApp(MyApp());
 }
@@ -30,7 +31,8 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => SignInPage(title: 'Authentication Page'),//HomePage(title: "Home Page"),
+        '/': (context) => LoadingScreen(),//HomePage(title: "Home Page"),
+        '/HomePage' : (context) => HomePage(title: 'Home Page'),
         '/video': (context) => VideoPage(title: "Video", id: '5yx6BWlEVcY'),
       },
     );
