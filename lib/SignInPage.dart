@@ -1,27 +1,29 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:uoft_gynonc_app/VerificationPage.dart';
 import 'HomePage.dart';
-import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class SignInPage extends StatefulWidget{
+class SignInPage extends StatefulWidget {
   SignInPage({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _SignInPageState createState() => _SignInPageState(); 
-
+  _SignInPageState createState() => _SignInPageState();
 }
 
-class _SignInPageState extends State<SignInPage>{
+class _SignInPageState extends State<SignInPage> {
   String emailAddress = '';
   String password = '';
   String confirmPassword = '';
-  String verificationCode = '';
+
   bool obscurePassword = true;
   bool signIn = true;
   User theUser;
+
+  bool usernameMistake = false;
+  bool passwordMistake = false;
 
   double messageSize = 14.0;
 
@@ -29,355 +31,412 @@ class _SignInPageState extends State<SignInPage>{
   void initState() {
     super.initState();
 
-    FirebaseAuth.instance
-      .authStateChanges()
-        .listen((User user) {
-          if (user == null) {
-            print('User is currently signed out!');
-          } else if (!user.isAnonymous){
-            theUser = user;
-            if(user.emailVerified)
-            {
-              print('Email is Verified' + user.email);
-              Navigator.pop(context);
-              Navigator.push(
-                        context,
-                        //The button will return us to the previous page in the list
-                        MaterialPageRoute(
-                            builder: (context) => HomePage(key: widget.key, title: 'Home Page',))
-                      );
-            }
-          }
-        });
+    FirebaseAuth.instance.authStateChanges().listen((User user) {
+      if (user == null) {
+        print('User is currently signed out!');
+      } else if (!user.isAnonymous) {
+        theUser = user;
+        if (user.emailVerified) {
+          print('Email is Verified' + user.email);
+          Navigator.pop(context);
+          Navigator.push(
+              context,
+              //The button will return us to the previous page in the list
+              MaterialPageRoute(
+                  builder: (context) => HomePage(
+                        key: widget.key,
+                        title: 'Home Page',
+                      )));
+        }
+      }
+    });
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title),),
-      body: Container(
-        alignment: Alignment.center,
-        height: size.height,
-        width: size.width,
-        child: ListView(
-          shrinkWrap: true,
-          //mainAxisAlignment: MainAxisAlignment.center,
-          //crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              alignment: Alignment.topCenter,
-              padding: EdgeInsets.symmetric(vertical: 25),
-              height: 150,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                fit: BoxFit.fitHeight,
-                image: AssetImage('assets/GynOnc_Logo.png'))),
-          )] +  (signIn ? buildSignIn() : buildCreateAccount()))
-      )
-    
-    );
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: Builder(
+            builder: (context) => Container(
+                alignment: Alignment.center,
+                height: size.height,
+                width: size.width,
+                child: ListView(
+                    shrinkWrap: true,
+                    //mainAxisAlignment: MainAxisAlignment.center,
+                    //crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                          Container(
+                            alignment: Alignment.topCenter,
+                            padding: EdgeInsets.symmetric(vertical: 25),
+                            height: 150,
+                            decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    fit: BoxFit.fitHeight,
+                                    image:
+                                        AssetImage('assets/GynOnc_Logo.png'))),
+                          )
+                        ] +
+                        (signIn
+                            ? buildSignIn(context)
+                            : buildCreateAccount(context))))));
   }
 
-  List<Widget> buildSignIn(){
+  List<Widget> buildSignIn(BuildContext context) {
     return [
-            Container(
-              child: Text('Sign In', style: TextStyle(fontSize: 32), textAlign: TextAlign.center,), 
-              padding: EdgeInsets.all(10),
-              alignment: Alignment.center,
-            ),
-
-            Container(alignment: Alignment.center,
-            padding: EdgeInsets.all(10),
-            child: TextFormField(
-              decoration: InputDecoration(
-                labelText: 'University Email Address'
-                
-                ),
-
-                onFieldSubmitted: (inEmail){
-                  setState((){
-                    emailAddress = inEmail;
+      Container(
+        child: Text(
+          'Sign In',
+          style: TextStyle(fontSize: 32),
+          textAlign: TextAlign.center,
+        ),
+        padding: EdgeInsets.all(10),
+        alignment: Alignment.center,
+      ),
+      Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(10),
+        child: TextFormField(
+          decoration: InputDecoration(
+              labelStyle:
+                  TextStyle(color: usernameMistake ? Colors.red : Colors.black),
+              labelText: usernameMistake
+                  ? 'University Email Address *'
+                  : 'University Email Address'),
+          onFieldSubmitted: (inEmail) {
+            setState(() {
+              emailAddress = inEmail;
+            });
+            print(emailAddress);
+          },
+        ),
+      ),
+      Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(10),
+        child: TextFormField(
+          obscureText: obscurePassword,
+          decoration: InputDecoration(
+              labelStyle:
+                  TextStyle(color: passwordMistake ? Colors.red : Colors.black),
+              suffixIcon: IconButton(
+                icon: Icon(Icons.visibility),
+                onPressed: () {
+                  setState(() {
+                    obscurePassword = !obscurePassword;
                   });
-                  print(emailAddress);
                 },
-                ),
-            ),
-
-            Container(alignment: Alignment.center,
-            padding: EdgeInsets.all(10),
-            child: TextFormField(
-              obscureText: obscurePassword,
-              decoration: InputDecoration(
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.visibility),
-                  onPressed: (){
-                    setState((){
-                      obscurePassword = !obscurePassword;
-                    });
-                  },
-                ),
-                labelText: 'Password'
-                
-                ),
-
-                onFieldSubmitted: (inPassword){
-                  setState((){
-                    password = inPassword;
-                  });
-                  print(password);
-                },
-                ),
-            ),
-
-            Container(
-              alignment: Alignment.center,
-              child: RichText(text: TextSpan(children: [
-              TextSpan(text: 'Don\'t have an account? ', style: TextStyle(color: Colors.black, fontSize: messageSize)),
-              TextSpan(text: 'Create one.', style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline, fontSize: messageSize),
-                recognizer: TapGestureRecognizer()..onTap = (){
-                  setState((){
-                    signIn = false;
-                    emailAddress = '';
-                    password = '';
-                  });
-                  print(emailAddress);
-                }
               ),
-                        
-            ]),),
+              labelText: passwordMistake ? 'Password *' : 'Password'),
+          onFieldSubmitted: (inPassword) {
+            setState(() {
+              password = inPassword;
+            });
+            print(password);
+          },
+        ),
+      ),
+      Container(
+        alignment: Alignment.center,
+        child: RichText(
+          text: TextSpan(children: [
+            TextSpan(
+                text: 'Don\'t have an account? ',
+                style: TextStyle(color: Colors.black, fontSize: messageSize)),
+            TextSpan(
+                text: 'Create one.',
+                style: TextStyle(
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                    fontSize: messageSize),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    setState(() {
+                      signIn = false;
+                      emailAddress = '';
+                      password = '';
+                    });
+                    print(emailAddress);
+                  }),
+          ]),
+        ),
+      ),
+      Container(
+          alignment: Alignment.center,
+          width: 100,
+          padding: EdgeInsets.symmetric(vertical: 25),
+          child: RaisedButton(
+            child: Text(
+              'Next',
+              style: TextStyle(fontSize: 14, color: Colors.white),
             ),
-            Container(
-              alignment: Alignment.center,
-              width: 100,
-              padding: EdgeInsets.symmetric(vertical: 25),
-              child: RaisedButton(
-                
-                child: Text('Next', style: TextStyle(fontSize: 14, color: Colors.white),),
-                color: Colors.cyan[700],
-                
-                onPressed: () async {
-                  print('Trying to sign in.');
-                  try {
-                    UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-                      email: emailAddress, password: password);
-                  } on FirebaseAuthException catch(e){
-                    if(e.code == 'user-not-found'){
-                      print('No account found with that email.');
-                    }
-                    else if(e.code == 'wrong-password'){
-                      print('Wrong password provided for that user.');
-                    }
-                  }
-                  catch(e){
-                    print(e);
-                  }
-                  
-              },)
-            ),
-            ];
+            color: Colors.cyan[700],
+            onPressed: () async {
+              //print('Trying to sign in.');
+              try {
+                UserCredential userCredential = await FirebaseAuth.instance
+                    .signInWithEmailAndPassword(
+                        email: emailAddress, password: password);
+              } on FirebaseAuthException catch (e) {
+                if (e.code == 'user-not-found') {
+                  //print('No account found with that email.');
+                  /*Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Row(children: [
+                      Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Icon(Icons.warning)),
+                      Text('No account found with that email.'),
+                    ]),
+                    action: SnackBarAction(
+                        label: 'Okay',
+                        onPressed: () {
+                          //Dismiss
+                        }),
+                  ));*/
+                  showErrorSnackbar(
+                      context, 'No account found with that email.');
+
+                  setState(() {
+                    usernameMistake = true;
+                  });
+                } else if (e.code == 'wrong-password') {
+                  //print('Wrong password provided for that user.');
+                  /*Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Row(children: [
+                      Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Icon(Icons.warning)),
+                      Text('Password is incorrect.'),
+                    ]),
+                    action: SnackBarAction(
+                        label: 'Okay',
+                        onPressed: () {
+                          //Dismiss
+                        }),
+                  ));*/
+                  showErrorSnackbar(context, 'Email or password is incorrect.');
+
+                  setState(() {
+                    passwordMistake = true;
+                  });
+                } else {
+                  setState(() {
+                    usernameMistake = false;
+                    passwordMistake = false;
+                  });
+
+                  theUser.reload();
+                }
+              } catch (e) {
+                print(e);
+              }
+            },
+          )),
+    ];
   }
 
-  List<Widget> buildCreateAccount(){
+  List<Widget> buildCreateAccount(BuildContext context) {
     return <Widget>[
       Container(
-              child: Text('Create Account', style: TextStyle(fontSize: 32), textAlign: TextAlign.center,), 
-              padding: EdgeInsets.all(10),
-              alignment: Alignment.center,
-            ),
+        child: Text(
+          'Create Account',
+          style: TextStyle(fontSize: 32),
+          textAlign: TextAlign.center,
+        ),
+        padding: EdgeInsets.all(10),
+        alignment: Alignment.center,
+      ),
+      Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(10),
+        child: TextFormField(
+          decoration: InputDecoration(
+              labelStyle:
+                  TextStyle(color: usernameMistake ? Colors.red : Colors.black),
+              labelText: usernameMistake
+                  ? 'University Email Address *'
+                  : 'University Email Address'),
+          onFieldSubmitted: (inEmail) {
+            if (!inEmail.contains('@ontariotechu.net')) {
+              showErrorSnackbar(context, 'Please use a UOIT email address.');
+              setState(() {
+                usernameMistake = true;
+              });
+            } else {
+              usernameMistake = false;
+            }
 
-            Container(alignment: Alignment.center,
-            padding: EdgeInsets.all(10),
-            child: TextFormField(
-              decoration: InputDecoration(
-                labelText: 'University Email Address'
-                
-                ),
-
-                onFieldSubmitted: (inEmail){
-                  setState((){
-                    emailAddress = inEmail;
+            setState(() {
+              emailAddress = inEmail;
+            });
+            print(emailAddress);
+          },
+        ),
+      ),
+      Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(10),
+        child: TextFormField(
+          obscureText: obscurePassword,
+          decoration: InputDecoration(
+              labelStyle:
+                  TextStyle(color: passwordMistake ? Colors.red : Colors.black),
+              suffixIcon: IconButton(
+                icon: Icon(Icons.visibility),
+                onPressed: () {
+                  setState(() {
+                    obscurePassword = !obscurePassword;
                   });
-                  print(emailAddress);
                 },
-                ),
-            ),
-
-            Container(alignment: Alignment.center,
-            padding: EdgeInsets.all(10),
-            child: TextFormField(
-              obscureText: obscurePassword,
-              decoration: InputDecoration(
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.visibility),
-                  onPressed: (){
-                    setState((){
-                      obscurePassword = !obscurePassword;
-                    });
-                  },
-                ),
-                labelText: 'Password'
-                
-                ),
-
-                onFieldSubmitted: (inPassword){
-                  setState((){
-                    password = inPassword;
-                  });
-                  print(password);
-                },
-                ),
-            ),
-
-            Container(alignment: Alignment.center,
-            padding: EdgeInsets.all(10),
-            child: TextFormField(
-              obscureText: obscurePassword,
-              decoration: InputDecoration(
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.visibility),
-                  onPressed: (){
-                    setState((){
-                      obscurePassword = !obscurePassword;
-                    });
-                  },
-                ),
-                labelText: 'Confirm Password'
-                
-                ),
-
-                onFieldSubmitted: (inPassword){
-                  setState((){
-                    confirmPassword = inPassword;
-                  });
-                  print(password);
-                },
-                ),
-            ),
-
-            Container(
-              alignment: Alignment.center,
-              child: RichText(text: TextSpan(children: [
-              TextSpan(text: 'Already have an account? ', style: TextStyle(color: Colors.black, fontSize: messageSize)),
-              TextSpan(text: 'Sign in.', style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline, fontSize: messageSize),
-                recognizer: TapGestureRecognizer()..onTap = (){
-                  setState((){
-                    signIn = true;
-                    emailAddress = '';
-                    password = '';
-                  });
-                }
               ),
-                        
-            ]),),
+              labelText: passwordMistake ? 'Password *' : 'Password'),
+          onFieldSubmitted: (inPassword) {
+            setState(() {
+              password = inPassword;
+            });
+            print(password);
+          },
+        ),
+      ),
+      Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(10),
+        child: TextFormField(
+          obscureText: obscurePassword,
+          decoration: InputDecoration(
+              labelStyle:
+                  TextStyle(color: passwordMistake ? Colors.red : Colors.black),
+              suffixIcon: IconButton(
+                icon: Icon(Icons.visibility),
+                onPressed: () {
+                  setState(() {
+                    obscurePassword = !obscurePassword;
+                  });
+                },
+              ),
+              labelText:
+                  passwordMistake ? 'Confirm Password *' : 'Confirm Password'),
+          onFieldSubmitted: (inPassword) {
+            setState(() {
+              confirmPassword = inPassword;
+            });
+            print(password);
+          },
+        ),
+      ),
+      Container(
+        alignment: Alignment.center,
+        child: RichText(
+          text: TextSpan(children: [
+            TextSpan(
+                text: 'Already have an account? ',
+                style: TextStyle(color: Colors.black, fontSize: messageSize)),
+            TextSpan(
+                text: 'Sign in.',
+                style: TextStyle(
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                    fontSize: messageSize),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    setState(() {
+                      signIn = true;
+                      emailAddress = '';
+                      password = '';
+                    });
+                  }),
+          ]),
+        ),
+      ),
+      Container(
+          alignment: Alignment.center,
+          width: 100,
+          padding: EdgeInsets.symmetric(vertical: 25),
+          child: RaisedButton(
+            child: Text(
+              'Next',
+              style: TextStyle(fontSize: 14, color: Colors.white),
             ),
-            Container(
-              alignment: Alignment.center,
-              width: 100,
-              padding: EdgeInsets.symmetric(vertical: 25),
-              child: RaisedButton(
-                child: Text('Next', style: TextStyle(fontSize: 14, color: Colors.white),),
-                color: Colors.cyan[700],
-                
-                onPressed: () async {
-                  if(password == confirmPassword){
-                  try{
-                    UserCredential userCredential = await  FirebaseAuth.instance.createUserWithEmailAndPassword(
-                      email: emailAddress, password: password
-                      );
-                      userCredential.user.sendEmailVerification();
-                  } on FirebaseAuthException catch(e){
-                    if(e.code == 'weak-password'){
-                      print('The password you entered is too weak.');
+            color: Colors.cyan[700],
+            onPressed: () async {
+              if (emailAddress.contains('@ontariotechu.net')) {
+                if (password == confirmPassword) {
+                  setState(() {
+                    passwordMistake = false;
+                  });
+                  try {
+                    UserCredential userCredential = await FirebaseAuth.instance
+                        .createUserWithEmailAndPassword(
+                            email: emailAddress, password: password);
+                    userCredential.user.sendEmailVerification();
+                    Scaffold.of(context).showSnackBar(SnackBar(
+                      content: Text('Email verification sent.'),
+                      action: SnackBarAction(
+                          label: 'Okay',
+                          onPressed: () {
+                            //Dismiss
+                          }),
+                    ));
+
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        //The button will return us to the previous page in the list
+                        MaterialPageRoute(
+                            builder: (context) => VerificationPage(
+                                  key: widget.key,
+                                  title: 'Verification Page',
+                                )));
+                  } on FirebaseAuthException catch (e) {
+                    if (e.code == 'weak-password') {
+                      showErrorSnackbar(context, 'Password is too weak.');
+
+                      setState(() {
+                        passwordMistake = true;
+                      });
+                    } else if (e.code == 'email-already-in-use') {
+                      showErrorSnackbar(context, 'Email already in use.');
+
+                      setState(() {
+                        usernameMistake = true;
+                      });
                     }
-                    else if(e.code == 'email-already-in-use'){
-                      print('An account already exists with that email.');
-                    }
-                  } 
-                  catch(e){
+                  } catch (e) {
                     print(e);
                   }
-                  }
-                  
-                  
-                  else{
-                    print('Passwords do not match.');
-                  } 
+                } else {
+                  showErrorSnackbar(context, 'Passwords do not match.');
 
-
-              },)
-            ),
-
+                  setState(() {
+                    passwordMistake = true;
+                  });
+                }
+              } else {
+                showErrorSnackbar(context, 'Please use a UOIT email address');
+                usernameMistake = true;
+              }
+            },
+          )),
     ];
   }
 
-  List<Widget> buildVerifyAccount(){
-    return <Widget>[
-       Container(
-              child: Text('Enter Email Verification Code', style: TextStyle(fontSize: 32), textAlign: TextAlign.center,), 
-              padding: EdgeInsets.all(10),
-              alignment: Alignment.center,
-            ),
-
-            Container(alignment: Alignment.center,
-            padding: EdgeInsets.all(10),
-            child: TextFormField(
-              decoration: InputDecoration(
-                labelText: 'Verification Code'
-                
-                ),
-
-                onFieldSubmitted: (inCode) async {
-                  setState((){
-                    verificationCode = inCode;
-                  });
-                  print(verificationCode);
-
-                  
-                },
-                ),
-            ),
-
-            Container(
-              alignment: Alignment.center,
-              child: RichText(text: TextSpan(children: [
-              TextSpan(text: 'Didn\'t receive a verification email? ', style: TextStyle(color: Colors.black, fontSize: messageSize)),
-              TextSpan(text: 'Resend email.', style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline, fontSize: messageSize),
-                recognizer: TapGestureRecognizer()..onTap = (){
-                  theUser.sendEmailVerification();
-                }
-              ),
-                        
-            ]),),
-            ),
-
-            Container(
-              alignment: Alignment.center,
-              width: 100,
-              padding: EdgeInsets.symmetric(vertical: 25),
-              child: RaisedButton(
-                child: Text('Verify', style: TextStyle(fontSize: 14, color: Colors.white),),
-                color: Colors.cyan[700],
-                
-                onPressed: () async {
-                  FirebaseAuth auth = FirebaseAuth.instance;
-
-                  try{
-                    await auth.checkActionCode(verificationCode);
-                    await auth.applyActionCode(verificationCode);
-
-                    auth.currentUser.reload();
-                  } on FirebaseAuthException catch (e){
-                    if(e.code == 'invalid-activation-code'){
-                      print('Invalid Activation Code');
-                    }                    
-                  }
-                }
-              ,)
-            ),
-
-
-    ];
+  void showErrorSnackbar(BuildContext context, String message) {
+    Scaffold.of(context).showSnackBar(SnackBar(
+      content: Row(children: [
+        Container(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Icon(Icons.warning)),
+        Text(message),
+      ]),
+      action: SnackBarAction(
+          label: 'Okay',
+          onPressed: () {
+            //Dismiss
+          }),
+    ));
   }
 }

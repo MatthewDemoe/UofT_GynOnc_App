@@ -11,8 +11,14 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  //FirebaseAuth mAuth = FirebaseAuth.instance;
-  // if (mAuth.currentUser == null) await mAuth.signInAnonymously();
+  FirebaseAuth mAuth = FirebaseAuth.instance;
+  if (!(mAuth.currentUser == null)) {
+    //mAuth.currentUser.delete();
+    print('USER IS NOT NULL');
+  } else {
+    await mAuth.signInAnonymously();
+    print('USER IS NULL');
+  }
 
   runApp(MyApp());
 }
@@ -31,8 +37,8 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => LoadingScreen(),//HomePage(title: "Home Page"),
-        '/HomePage' : (context) => HomePage(title: 'Home Page'),
+        '/': (context) => LoadingScreen(), //HomePage(title: "Home Page"),
+        '/HomePage': (context) => HomePage(title: 'Home Page'),
         '/video': (context) => VideoPage(title: "Video", id: '5yx6BWlEVcY'),
       },
     );
