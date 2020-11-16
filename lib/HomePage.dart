@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:uoft_gynonc_app/AccountPage.dart';
 import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'CategoryModules.dart';
+import 'SignInPage.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
@@ -21,6 +24,21 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
+    FirebaseAuth.instance.authStateChanges().listen((User user) {
+      if (user == null) {
+        print('User is currently signed out!');
+        Navigator.pop(context);
+        Navigator.push(
+            context,
+            //The button will return us to the previous page in the list
+            MaterialPageRoute(
+                builder: (context) => SignInPage(
+                      key: widget.key,
+                      title: 'Authentication Page',
+                    )));
+      }
+    });
 
     header = Container(
         padding: EdgeInsets.all(8),
@@ -98,6 +116,22 @@ class _HomePageState extends State<HomePage> {
                   Navigator.pop(context);
                 },
               ));
+
+              drawer.add(new Container(
+                  child: ListTile(
+                title: Text('Account'),
+                onTap: () {
+                  /*FirebaseAuth mAuth = FirebaseAuth.instance;
+                  mAuth.signOut();
+                  Navigator.pop(context);*/
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AccountPage(
+                                key: widget.key,
+                              )));
+                },
+              )));
 
               return new ListView(children: drawer);
             }),

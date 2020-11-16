@@ -20,6 +20,7 @@ class _SignInPageState extends State<SignInPage> {
 
   bool obscurePassword = true;
   bool signIn = true;
+  bool forgotPassword = false;
   User theUser;
 
   bool usernameMistake = false;
@@ -81,9 +82,11 @@ class _SignInPageState extends State<SignInPage> {
                                         AssetImage('assets/GynOnc_Logo.png'))),
                           )
                         ] +
-                        (signIn
-                            ? buildSignIn(context)
-                            : buildCreateAccount(context))))));
+                        (!forgotPassword
+                            ? (signIn
+                                ? buildSignIn(context)
+                                : buildCreateAccount(context))
+                            : buildReset(context))))));
   }
 
   List<Widget> buildSignIn(BuildContext context) {
@@ -141,6 +144,7 @@ class _SignInPageState extends State<SignInPage> {
         ),
       ),
       Container(
+        padding: EdgeInsets.all(10),
         alignment: Alignment.center,
         child: RichText(
           text: TextSpan(children: [
@@ -157,8 +161,35 @@ class _SignInPageState extends State<SignInPage> {
                   ..onTap = () {
                     setState(() {
                       signIn = false;
-                      emailAddress = '';
-                      password = '';
+                      //emailAddress = '';
+                      //password = '';
+                    });
+                    print(emailAddress);
+                  }),
+          ]),
+        ),
+      ),
+      Container(
+        padding: EdgeInsets.all(10),
+        alignment: Alignment.center,
+        child: RichText(
+          text: TextSpan(children: [
+            TextSpan(
+                text: 'Forgot your password? ',
+                style: TextStyle(color: Colors.black, fontSize: messageSize)),
+            TextSpan(
+                text: 'Reset it.',
+                style: TextStyle(
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                    fontSize: messageSize),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    setState(() {
+                      forgotPassword = true;
+                      //signIn = false;
+                      //emailAddress = '';
+                      //password = '';
                     });
                     print(emailAddress);
                   }),
@@ -176,27 +207,12 @@ class _SignInPageState extends State<SignInPage> {
             ),
             color: Colors.cyan[700],
             onPressed: () async {
-              //print('Trying to sign in.');
               try {
                 UserCredential userCredential = await FirebaseAuth.instance
                     .signInWithEmailAndPassword(
                         email: emailAddress, password: password);
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'user-not-found') {
-                  //print('No account found with that email.');
-                  /*Scaffold.of(context).showSnackBar(SnackBar(
-                    content: Row(children: [
-                      Container(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Icon(Icons.warning)),
-                      Text('No account found with that email.'),
-                    ]),
-                    action: SnackBarAction(
-                        label: 'Okay',
-                        onPressed: () {
-                          //Dismiss
-                        }),
-                  ));*/
                   showErrorSnackbar(
                       context, 'No account found with that email.');
 
@@ -204,20 +220,6 @@ class _SignInPageState extends State<SignInPage> {
                     usernameMistake = true;
                   });
                 } else if (e.code == 'wrong-password') {
-                  //print('Wrong password provided for that user.');
-                  /*Scaffold.of(context).showSnackBar(SnackBar(
-                    content: Row(children: [
-                      Container(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Icon(Icons.warning)),
-                      Text('Password is incorrect.'),
-                    ]),
-                    action: SnackBarAction(
-                        label: 'Okay',
-                        onPressed: () {
-                          //Dismiss
-                        }),
-                  ));*/
                   showErrorSnackbar(context, 'Email or password is incorrect.');
 
                   setState(() {
@@ -329,6 +331,7 @@ class _SignInPageState extends State<SignInPage> {
         ),
       ),
       Container(
+        padding: EdgeInsets.all(10),
         alignment: Alignment.center,
         child: RichText(
           text: TextSpan(children: [
@@ -419,6 +422,80 @@ class _SignInPageState extends State<SignInPage> {
                 showErrorSnackbar(context, 'Please use a UOIT email address');
                 usernameMistake = true;
               }
+            },
+          )),
+    ];
+  }
+
+  List<Widget> buildReset(BuildContext context) {
+    return [
+      Container(
+        child: Text(
+          'Reset Your Password',
+          style: TextStyle(fontSize: 32),
+          textAlign: TextAlign.center,
+        ),
+        padding: EdgeInsets.all(10),
+        alignment: Alignment.center,
+      ),
+      Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(10),
+        child: TextFormField(
+          decoration: InputDecoration(
+              labelStyle:
+                  TextStyle(color: usernameMistake ? Colors.red : Colors.black),
+              labelText: usernameMistake
+                  ? 'University Email Address *'
+                  : 'University Email Address'),
+          onFieldSubmitted: (inEmail) {
+            setState(() {
+              emailAddress = inEmail;
+            });
+            print(emailAddress);
+          },
+        ),
+      ),
+      Container(
+        padding: EdgeInsets.all(10),
+        alignment: Alignment.center,
+        child: RichText(
+          text: TextSpan(children: [
+            TextSpan(
+                text: 'Don\'t need to reset your password? ',
+                style: TextStyle(color: Colors.black, fontSize: messageSize)),
+            TextSpan(
+                text: 'Return to sign in page.',
+                style: TextStyle(
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                    fontSize: messageSize),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    setState(() {
+                      forgotPassword = false;
+                      //emailAddress = '';
+                      //password = '';
+                    });
+                    print(emailAddress);
+                  }),
+          ]),
+        ),
+      ),
+      Container(
+          alignment: Alignment.center,
+          width: 100,
+          padding: EdgeInsets.symmetric(vertical: 25),
+          child: RaisedButton(
+            child: Text(
+              'Next',
+              style: TextStyle(fontSize: 14, color: Colors.white),
+            ),
+            color: Colors.cyan[700],
+            onPressed: () {
+              FirebaseAuth mAuth = FirebaseAuth.instance;
+              mAuth.sendPasswordResetEmail(email: emailAddress);
+              showErrorSnackbar(context, 'Password reset link sent.');
             },
           )),
     ];

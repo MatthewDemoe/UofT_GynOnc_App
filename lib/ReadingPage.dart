@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-
 class ReadingPage extends StatelessWidget {
-  ReadingPage({this.title = 'Reading', this.doc});
+  ReadingPage({Key key, this.title = 'Reading', this.doc}) : super(key: key);
 
   final String title;
   final QueryDocumentSnapshot doc;
@@ -81,38 +80,51 @@ class ReadingPage extends StatelessWidget {
 
       if (doc.id.contains('Rich')) {
         return StreamBuilder(
-      stream: FirebaseFirestore.instance
-          .collection(doc.reference.collection('TextSpans').path)
-          .snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (!snapshot.hasData)
-          return new Container(
-            alignment: Alignment.center,
-            height: 110.0,
-            width: 110.0, 
-            //While we wait for data...
-            child: CircularProgressIndicator(),
-          );
-        return buildRichText(context, snapshot);
-      },
-    );
+          stream: FirebaseFirestore.instance
+              .collection(doc.reference.collection('TextSpans').path)
+              .snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (!snapshot.hasData)
+              return new Container(
+                alignment: Alignment.center,
+                height: 110.0,
+                width: 110.0,
+                //While we wait for data...
+                child: CircularProgressIndicator(),
+              );
+            return buildRichText(context, snapshot);
+          },
+        );
       }
     }).toList();
   }
 
-  Widget buildRichText(BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
+  Widget buildRichText(
+      BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15, vertical: 25),
       alignment: Alignment.center,
       child: RichText(
-        textAlign: TextAlign.center,
-        text: new TextSpan(children: snapshot.data.docs.map((doc){
-      if(doc.data().containsKey('Link'))
-        return TextSpan(text: doc.data()['Text'], 
-                        style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline, fontSize: 18), 
-                        recognizer: TapGestureRecognizer()..onTap = (){launch(doc.data()['Link']);});
+          textAlign: TextAlign.center,
+          text: new TextSpan(
+              children: snapshot.data.docs.map((doc) {
+            if (doc.data().containsKey('Link'))
+              return TextSpan(
+                  text: doc.data()['Text'],
+                  style: TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                      fontSize: 18),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      launch(doc.data()['Link']);
+                    });
 
-      return TextSpan(text: doc.data()['Text'], style: TextStyle(color: Colors.black, fontSize: 18));
-    }).toList())),);
+            return TextSpan(
+                text: doc.data()['Text'],
+                style: TextStyle(color: Colors.black, fontSize: 18));
+          }).toList())),
+    );
   }
 }

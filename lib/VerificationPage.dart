@@ -117,7 +117,7 @@ class _VerificationPageState extends State<VerificationPage> {
                                       key: widget.key,
                                     )));
 
-                        if (theUser.emailVerified) {
+                        /*if (theUser.emailVerified) {
                           Navigator.pop(context);
                           Navigator.push(
                               context,
@@ -137,7 +137,7 @@ class _VerificationPageState extends State<VerificationPage> {
                                   //Dismiss
                                 }),
                           ));
-                        }
+                        }*/
                       },
                     )),
               ],
