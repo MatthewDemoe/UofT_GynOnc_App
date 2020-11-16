@@ -79,53 +79,62 @@ class _EvaluationPageState extends State<EvaluationPage> {
                   //Iterate through each question
                   evaluations.forEach((element) {
                     //Count the correct answers
-                  correctAnswers += element;
+                    correctAnswers += element;
                   });
                   //Calculate the percentage of correct answers
 
-
                   setState(() {
-                      percent = (correctAnswers.toDouble() /
-                      theQuestions.length.toDouble());
+                    percent = (correctAnswers.toDouble() /
+                        theQuestions.length.toDouble());
 
                     //Stop hiding correct answers
-                    hideAnswers = false;                    
+                    hideAnswers = false;
                   });
                   mark.add(new Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.only(
-                            left: 10, right: 10, top: 10, bottom: 10),
-                        child: Text(
-                          (percent * 100.0).round().toString() + '%',
-                          style: TextStyle(
-                              fontSize: 48,
-                              //Interpolate between green and red based on score
-                              color: Color.lerp(
-                                  Colors.red, Colors.green, percent)),
-                        )));
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.only(
+                          left: 10, right: 10, top: 10, bottom: 10),
+                      child: Text(
+                        (percent * 100.0).round().toString() + '%',
+                        style: TextStyle(
+                            fontSize: 48,
+                            //Interpolate between green and red based on score
+                            color:
+                                Color.lerp(Colors.red, Colors.green, percent)),
+                      )));
 
-                    mark.add(Container(
+                  mark.add(Container(
                       padding: EdgeInsets.only(bottom: 25),
                       child: RichText(
-                      textAlign: TextAlign.center,
-                      text: new TextSpan(children: [
-                      TextSpan(text: 'Click ', style: TextStyle(color: Colors.black, fontSize: 18)), 
-                      TextSpan(text: 'here', 
-                        style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline, fontSize: 18), 
-                        recognizer: TapGestureRecognizer()..onTap = (){launch(widget.doc.data()['Link']);}), 
-                      TextSpan(text: ' for further reading.', style: TextStyle(color: Colors.black, fontSize: 18)), 
-
-                    ]))));
+                          textAlign: TextAlign.center,
+                          text: new TextSpan(children: [
+                            TextSpan(
+                                text: 'Click ',
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 18)),
+                            TextSpan(
+                                text: 'here',
+                                style: TextStyle(
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline,
+                                    fontSize: 18),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    launch(widget.doc.data()['Link']);
+                                  }),
+                            TextSpan(
+                                text: ' for further reading.',
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 18)),
+                          ]))));
                 },
               ));
         }
 
         return CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
           SliverList(
-              delegate: SliverChildListDelegate( 
-
-           theWidgets + ((hideAnswers) ? [submitButton] : mark)
-          ))
+              delegate: SliverChildListDelegate(
+                  theWidgets + ((hideAnswers) ? [submitButton] : mark)))
         ]);
       },
     ));
@@ -138,9 +147,11 @@ class _EvaluationPageState extends State<EvaluationPage> {
     return snapshot.data.docs.map((question) {
       counter = counter + 1;
 
+      print(question.data()['Question']);
       QuestionWidget tmp = QuestionWidget(
         doc: question,
         questionNum: counter,
+        shouldShow: true,
       );
 
       evaluations.add(0);

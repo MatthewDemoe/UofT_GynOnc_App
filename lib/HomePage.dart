@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:uoft_gynonc_app/AccountPage.dart';
+import 'package:uoft_gynonc_app/GeneralEvaluationPage.dart';
 import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'CategoryModules.dart';
 import 'SignInPage.dart';
@@ -85,14 +86,6 @@ class _HomePageState extends State<HomePage> {
                   //Block that appears at the top of the drawer
                   child: DrawerHeader(
                     child: header,
-                    /*Text(
-                      'Categories',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                      ),
-                    ),*/
                     decoration: BoxDecoration(
                       color: Colors.cyan[700],
                     ),
@@ -104,6 +97,20 @@ class _HomePageState extends State<HomePage> {
               drawer.addAll(getModuleCategories(snapshot).map((e) => e));
 
               //Also add some additional buttons
+
+              drawer.add(new ListTile(
+                title: Text('Overall Test'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => GeneralEvaluationPage(
+                                title: 'General Test',
+                              )));
+                },
+              ));
+
               drawer.add(new ListTile(
                 title: Text('About'),
                 onTap: () {

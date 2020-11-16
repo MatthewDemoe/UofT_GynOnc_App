@@ -10,6 +10,7 @@ class QuestionWidget extends StatefulWidget {
     Key key,
     this.doc,
     this.questionNum,
+    this.shouldShow = true,
   }) : super(key: key);
 
   final evaluationEvent = Event<ValueEventArgs>();
@@ -19,6 +20,7 @@ class QuestionWidget extends StatefulWidget {
   final QueryDocumentSnapshot doc;
   //The question number we are on
   final int questionNum;
+  final bool shouldShow;
 
   void showAnswers() {
     showAnswerEvent.broadcast();
@@ -58,16 +60,21 @@ class _QuestionWidgetState extends State<QuestionWidget>
     if (widget.doc.data().keys.contains('Image'))
       img = buildImage(widget.doc.data()['Image']);
 
-    widget.showAnswerEvent.subscribe((args) {
-      setState(() {
-        hideAnswers = false;
+    if (widget.shouldShow) {
+      widget.showAnswerEvent.subscribe((args) {
+        setState(() {
+          hideAnswers = false;
+        });
       });
-    });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    //print(widget.doc.data()['Question']);
+
     return Container(
       padding: EdgeInsets.all(10),
       //Arrange questions in a column
