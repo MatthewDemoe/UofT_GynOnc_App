@@ -107,9 +107,7 @@ class _SignInPageState extends State<SignInPage> {
           decoration: InputDecoration(
               labelStyle:
                   TextStyle(color: usernameMistake ? Colors.red : Colors.black),
-              labelText: usernameMistake
-                  ? 'University Email Address *'
-                  : 'University Email Address'),
+              labelText: usernameMistake ? 'Email Address *' : 'Email Address'),
           onFieldSubmitted: (inEmail) {
             setState(() {
               emailAddress = inEmail;
@@ -259,23 +257,20 @@ class _SignInPageState extends State<SignInPage> {
           decoration: InputDecoration(
               labelStyle:
                   TextStyle(color: usernameMistake ? Colors.red : Colors.black),
-              labelText: usernameMistake
-                  ? 'University Email Address *'
-                  : 'University Email Address'),
+              labelText: usernameMistake ? 'Email Address *' : 'Email Address'),
           onFieldSubmitted: (inEmail) {
-            if (!inEmail.contains('@ontariotechu.net')) {
+            /*if (!inEmail.contains('@ontariotechu.net')) {
               showErrorSnackbar(context, 'Please use a UOIT email address.');
               setState(() {
                 usernameMistake = true;
               });
-            } else {
-              usernameMistake = false;
-            }
+            } else {}*/
+            usernameMistake = false;
 
             setState(() {
               emailAddress = inEmail;
             });
-            print(emailAddress);
+            //print(emailAddress);
           },
         ),
       ),
@@ -366,61 +361,56 @@ class _SignInPageState extends State<SignInPage> {
             ),
             color: Colors.cyan[700],
             onPressed: () async {
-              if (emailAddress.contains('@ontariotechu.net')) {
-                if (password == confirmPassword) {
-                  setState(() {
-                    passwordMistake = false;
-                  });
-                  try {
-                    UserCredential userCredential = await FirebaseAuth.instance
-                        .createUserWithEmailAndPassword(
-                            email: emailAddress, password: password);
-                    userCredential.user.sendEmailVerification();
-                    Scaffold.of(context).showSnackBar(SnackBar(
-                      content: Text('Email verification sent.'),
-                      action: SnackBarAction(
-                          label: 'Okay',
-                          onPressed: () {
-                            //Dismiss
-                          }),
-                    ));
+              if (password == confirmPassword) {
+                setState(() {
+                  passwordMistake = false;
+                });
+                try {
+                  UserCredential userCredential = await FirebaseAuth.instance
+                      .createUserWithEmailAndPassword(
+                          email: emailAddress, password: password);
+                  userCredential.user.sendEmailVerification();
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Text('Email verification sent.'),
+                    action: SnackBarAction(
+                        label: 'Okay',
+                        onPressed: () {
+                          //Dismiss
+                        }),
+                  ));
 
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        //The button will return us to the previous page in the list
-                        MaterialPageRoute(
-                            builder: (context) => VerificationPage(
-                                  key: widget.key,
-                                  title: 'Verification Page',
-                                )));
-                  } on FirebaseAuthException catch (e) {
-                    if (e.code == 'weak-password') {
-                      showErrorSnackbar(context, 'Password is too weak.');
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      //The button will return us to the previous page in the list
+                      MaterialPageRoute(
+                          builder: (context) => VerificationPage(
+                                key: widget.key,
+                                title: 'Verification Page',
+                              )));
+                } on FirebaseAuthException catch (e) {
+                  if (e.code == 'weak-password') {
+                    showErrorSnackbar(context, 'Password is too weak.');
 
-                      setState(() {
-                        passwordMistake = true;
-                      });
-                    } else if (e.code == 'email-already-in-use') {
-                      showErrorSnackbar(context, 'Email already in use.');
+                    setState(() {
+                      passwordMistake = true;
+                    });
+                  } else if (e.code == 'email-already-in-use') {
+                    showErrorSnackbar(context, 'Email already in use.');
 
-                      setState(() {
-                        usernameMistake = true;
-                      });
-                    }
-                  } catch (e) {
-                    print(e);
+                    setState(() {
+                      usernameMistake = true;
+                    });
                   }
-                } else {
-                  showErrorSnackbar(context, 'Passwords do not match.');
-
-                  setState(() {
-                    passwordMistake = true;
-                  });
+                } catch (e) {
+                  print(e);
                 }
               } else {
-                showErrorSnackbar(context, 'Please use a UOIT email address');
-                usernameMistake = true;
+                showErrorSnackbar(context, 'Passwords do not match.');
+
+                setState(() {
+                  passwordMistake = true;
+                });
               }
             },
           )),

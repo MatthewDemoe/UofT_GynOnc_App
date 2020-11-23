@@ -117,7 +117,7 @@ class _GeneralEvaluationPageState extends State<GeneralEvaluationPage> {
                 ),
                 color: Colors.cyan[700],
                 child: Text(
-                  'Submit',
+                  'Start',
                   style: TextStyle(fontSize: 28),
                 ),
 

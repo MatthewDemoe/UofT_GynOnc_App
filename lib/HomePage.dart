@@ -79,10 +79,14 @@ class _HomePageState extends State<HomePage> {
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
               //Return a progress indicator if we need to wait for data
-              if (!snapshot.hasData) return CircularProgressIndicator();
+              if (!snapshot.hasData)
+                return Container(
+                    height: 100.0,
+                    width: 100.0,
+                    child: CircularProgressIndicator());
               List<Widget> drawer = [
                 Container(
-                  //height: 100.0,
+                  height: 100.0,
                   //Block that appears at the top of the drawer
                   child: DrawerHeader(
                     child: header,
@@ -99,6 +103,7 @@ class _HomePageState extends State<HomePage> {
               //Also add some additional buttons
 
               drawer.add(new ListTile(
+                leading: Icon(Icons.assignment),
                 title: Text('Overall Test'),
                 onTap: () {
                   Navigator.pop(context);
@@ -112,13 +117,10 @@ class _HomePageState extends State<HomePage> {
               ));
 
               drawer.add(new ListTile(
+                leading: Icon(
+                  Icons.chat,
+                ),
                 title: Text('About'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ));
-              drawer.add(new ListTile(
-                title: Text('Contact Us'),
                 onTap: () {
                   Navigator.pop(context);
                 },
@@ -126,11 +128,9 @@ class _HomePageState extends State<HomePage> {
 
               drawer.add(new Container(
                   child: ListTile(
+                leading: Icon(Icons.account_circle),
                 title: Text('Account'),
                 onTap: () {
-                  /*FirebaseAuth mAuth = FirebaseAuth.instance;
-                  mAuth.signOut();
-                  Navigator.pop(context);*/
                   Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -139,6 +139,14 @@ class _HomePageState extends State<HomePage> {
                               )));
                 },
               )));
+
+              drawer.add(new ListTile(
+                leading: Icon(Icons.email),
+                title: Text('Contact Us'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ));
 
               return new ListView(children: drawer);
             }),
@@ -151,6 +159,7 @@ class _HomePageState extends State<HomePage> {
     //Iterating through each document in the snapshot(each category)
     return snapshot.data.docs
         .map((doc) => new ListTile(
+              leading: Icon(Icons.receipt_long_outlined),
               title: new Text(doc.data()['name']),
               onTap: () {
                 setState(() {
