@@ -61,7 +61,7 @@ class _HomePageState extends State<HomePage> {
 
     header = Container(
         padding: EdgeInsets.all(8),
-        height: 150,
+        height: 200,
         child: buildImage('GynOnc_Logo.png'));
   }
 

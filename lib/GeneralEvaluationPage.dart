@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/rendering.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'dart:math';
 import 'QuestionWidget.dart';
 
@@ -154,7 +155,11 @@ class _GeneralEvaluationPageState extends State<GeneralEvaluationPage> {
                             ));
                       });
 
-                      FirebaseFirestore.instance
+                      updateMark(
+                          section: 'Overall Evaluation',
+                          mark: (percent * 100.0).round().toString() + '%');
+
+                      /*FirebaseFirestore.instance
                           .collection('Users')
                           .doc(FirebaseAuth.instance.currentUser.email)
                           .update(
@@ -162,7 +167,7 @@ class _GeneralEvaluationPageState extends State<GeneralEvaluationPage> {
                           'General Evaluation':
                               (percent * 100.0).round().toString() + '%'
                         },
-                      );
+                      );*/
                     },
                   )));
             });

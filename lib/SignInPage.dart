@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:uoft_gynonc_app/VerificationPage.dart';
 import 'HomePage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignInPage extends StatefulWidget {
   SignInPage({Key key, this.title}) : super(key: key);
@@ -17,6 +18,8 @@ class _SignInPageState extends State<SignInPage> {
   String emailAddress = '';
   String password = '';
   String confirmPassword = '';
+  String firstName = '';
+  String lastName = '';
 
   bool obscurePassword = true;
   bool signIn = true;
@@ -68,8 +71,6 @@ class _SignInPageState extends State<SignInPage> {
                 width: size.width,
                 child: ListView(
                     shrinkWrap: true,
-                    //mainAxisAlignment: MainAxisAlignment.center,
-                    //crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                           Container(
                             alignment: Alignment.topCenter,
@@ -159,8 +160,6 @@ class _SignInPageState extends State<SignInPage> {
                   ..onTap = () {
                     setState(() {
                       signIn = false;
-                      //emailAddress = '';
-                      //password = '';
                     });
                     print(emailAddress);
                   }),
@@ -185,9 +184,6 @@ class _SignInPageState extends State<SignInPage> {
                   ..onTap = () {
                     setState(() {
                       forgotPassword = true;
-                      //signIn = false;
-                      //emailAddress = '';
-                      //password = '';
                     });
                     print(emailAddress);
                   }),
@@ -259,18 +255,11 @@ class _SignInPageState extends State<SignInPage> {
                   TextStyle(color: usernameMistake ? Colors.red : Colors.black),
               labelText: usernameMistake ? 'Email Address *' : 'Email Address'),
           onFieldSubmitted: (inEmail) {
-            /*if (!inEmail.contains('@ontariotechu.net')) {
-              showErrorSnackbar(context, 'Please use a UOIT email address.');
-              setState(() {
-                usernameMistake = true;
-              });
-            } else {}*/
             usernameMistake = false;
 
             setState(() {
               emailAddress = inEmail;
             });
-            //print(emailAddress);
           },
         ),
       ),
@@ -321,7 +310,34 @@ class _SignInPageState extends State<SignInPage> {
             setState(() {
               confirmPassword = inPassword;
             });
-            print(password);
+          },
+        ),
+      ),
+      Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(10),
+        child: TextFormField(
+          decoration: InputDecoration(
+              labelStyle: TextStyle(color: Colors.black),
+              labelText: 'First Name'),
+          onFieldSubmitted: (inName) {
+            setState(() {
+              firstName = inName;
+            });
+          },
+        ),
+      ),
+      Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(10),
+        child: TextFormField(
+          decoration: InputDecoration(
+              labelStyle: TextStyle(color: Colors.black),
+              labelText: 'Last Name'),
+          onFieldSubmitted: (inName) {
+            setState(() {
+              lastName = inName;
+            });
           },
         ),
       ),
@@ -378,6 +394,8 @@ class _SignInPageState extends State<SignInPage> {
                           //Dismiss
                         }),
                   ));
+
+                  initializeUser();
 
                   Navigator.pop(context);
                   Navigator.push(
@@ -505,5 +523,55 @@ class _SignInPageState extends State<SignInPage> {
             //Dismiss
           }),
     ));
+  }
+
+  void initializeUser() {
+    FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser.email)
+        .set({});
+
+    FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser.email)
+        .update({'First Name': firstName});
+
+    FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser.email)
+        .update({'Last Name': lastName});
+
+    FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser.email)
+        .collection('Evaluations')
+        .doc('Marks')
+        .set({});
+
+    FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser.email)
+        .collection('Evaluations')
+        .doc('Marks')
+        .update({'Overall Evaluation': 'Not Attempted'});
+
+    FirebaseFirestore.instance
+        .collection('Module Categories ')
+        .snapshots()
+        .forEach((element) {
+      element.docs.forEach((category) {
+        category.reference.collection('Modules').snapshots().forEach((module) {
+          module.docs.forEach((doc) {
+            print(doc.id);
+            FirebaseFirestore.instance
+                .collection('Users')
+                .doc(FirebaseAuth.instance.currentUser.email)
+                .collection('Evaluations')
+                .doc('Marks')
+                .update({doc.id + ' Evaluation': 'Not Attempted'});
+          });
+        });
+      });
+    });
   }
 }

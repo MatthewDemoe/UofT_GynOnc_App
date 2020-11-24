@@ -116,28 +116,6 @@ class _VerificationPageState extends State<VerificationPage> {
                                 builder: (context) => LoadingScreen(
                                       key: widget.key,
                                     )));
-
-                        /*if (theUser.emailVerified) {
-                          Navigator.pop(context);
-                          Navigator.push(
-                              context,
-                              //The button will return us to the previous page in the list
-                              MaterialPageRoute(
-                                  builder: (context) => HomePage(
-                                        key: widget.key,
-                                        title: 'Home Page',
-                                      )));
-                        } else {
-                          Scaffold.of(context).showSnackBar(SnackBar(
-                            content: Text(
-                                'Account is not currently verified. Check your email for a verification link.'),
-                            action: SnackBarAction(
-                                label: 'Okay',
-                                onPressed: () {
-                                  //Dismiss
-                                }),
-                          ));
-                        }*/
                       },
                     )),
               ],

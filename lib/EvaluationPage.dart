@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/rendering.dart';
+import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'QuestionWidget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -117,7 +118,11 @@ class _EvaluationPageState extends State<EvaluationPage> {
                                 Color.lerp(Colors.red, Colors.green, percent)),
                       )));
 
-                  FirebaseFirestore.instance
+                  updateMark(
+                      section: moduleID + ' Evaluation',
+                      mark: (percent * 100.0).round().toString() + '%');
+
+                  /*FirebaseFirestore.instance
                       .collection('Users')
                       .doc(FirebaseAuth.instance.currentUser.email)
                       .update(
@@ -125,7 +130,7 @@ class _EvaluationPageState extends State<EvaluationPage> {
                       moduleID + ' Evaluation':
                           (percent * 100.0).round().toString() + '%'
                     },
-                  );
+                  );*/
 
                   mark.add(Container(
                       padding: EdgeInsets.only(bottom: 25),

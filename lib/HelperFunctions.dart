@@ -1,5 +1,7 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 Future<Widget> getImage(String image) async {
   Image img;
@@ -42,4 +44,15 @@ Widget buildImage(String image) {
           child: CircularProgressIndicator(),
         );
       });
+}
+
+void updateMark({String section, String mark}) {
+  FirebaseFirestore.instance
+      .collection('Users')
+      .doc(FirebaseAuth.instance.currentUser.email)
+      .collection('Evaluations')
+      .doc('Marks')
+      .update(
+    {section: mark},
+  );
 }
