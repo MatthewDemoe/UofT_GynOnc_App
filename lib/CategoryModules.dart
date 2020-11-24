@@ -4,15 +4,17 @@ import 'ModuleButton.dart';
 
 class CategoryModules extends StatelessWidget {
   CategoryModules(
-      {this.modulesToLoad = 'module_categories/disease_modules/modules'});
+      {this.modulesToLoad = '/Module Categories /Disease Modules/Modules'});
 
   final String modulesToLoad;
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
+      //Query the database
       stream: FirebaseFirestore.instance.collection(modulesToLoad).snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        //Show a progress indicator if we have to wait for data
         if (!snapshot.hasData) return CircularProgressIndicator();
         return new Column(
           children: getModuleButtons(snapshot, context),
@@ -21,6 +23,7 @@ class CategoryModules extends StatelessWidget {
     );
   }
 
+  //Build a button for each module in a category
   List<Widget> getModuleButtons(
       AsyncSnapshot<QuerySnapshot> snapshot, BuildContext context) {
     return snapshot.data.docs.map((doc) {

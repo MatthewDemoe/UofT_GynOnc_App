@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   CategoryModules categoryModules = CategoryModules();
 
   Widget header;
+  List<String> moduleNames = new List<String>();
 
   @override
   void initState() {
@@ -39,6 +40,23 @@ class _HomePageState extends State<HomePage> {
                       title: 'Authentication Page',
                     )));
       }
+    });
+
+    FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser.email)
+        .get()
+        .then((onExist) {
+      onExist.exists
+          ? FirebaseFirestore.instance
+              .collection('Users')
+              .doc(FirebaseAuth.instance.currentUser.email)
+              .update({})
+          : initializeUser();
+    });
+
+    moduleNames.forEach((element) {
+      print(element);
     });
 
     header = Container(
@@ -74,7 +92,7 @@ class _HomePageState extends State<HomePage> {
         child: StreamBuilder<QuerySnapshot>(
             //Look in the database for each category of module we have
             stream: FirebaseFirestore.instance
-                .collection('module_categories')
+                .collection('/Module Categories ')
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -103,15 +121,13 @@ class _HomePageState extends State<HomePage> {
               //Also add some additional buttons
 
               drawer.add(new ListTile(
-                leading: Icon(Icons.assignment),
-                title: Text('Overall Test'),
-                onTap: () {
+				leading: Icon(Icons.assignment),                onTap: () {
                   Navigator.pop(context);
                   Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (context) => GeneralEvaluationPage(
-                                title: 'General Test',
+                                title: 'General Evaluation',
                               )));
                 },
               ));
@@ -159,9 +175,8 @@ class _HomePageState extends State<HomePage> {
     //Iterating through each document in the snapshot(each category)
     return snapshot.data.docs
         .map((doc) => new ListTile(
-              leading: Icon(Icons.receipt_long_outlined),
-              title: new Text(doc.data()['name']),
-              onTap: () {
+              title: new Text(doc.id,
+			leading: Icon(Icons.receipt_long_outlined),              onTap: () {
                 setState(() {
                   Navigator.pop(context);
                   //When you tap on a list tile, create a new list of buttons to be displayed
@@ -169,10 +184,38 @@ class _HomePageState extends State<HomePage> {
                   categoryModules = CategoryModules(
                       modulesToLoad: doc.reference.path +
                           '/' +
-                          doc.reference.collection('modules').id);
+                          doc.reference.collection('Modules').id);
                 });
               },
             ))
         .toList();
+  }
+
+  void initializeUser() {
+    FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser.email)
+        .set({});
+
+    FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser.email)
+        .update({'General Evaluation': 'Not Attempted'});
+
+    FirebaseFirestore.instance
+        .collection('Module Categories')
+        .snapshots()
+        .forEach((element) {
+      element.docs.forEach((category) {
+        category.reference.collection('Modules').snapshots().forEach((module) {
+          module.docs.forEach((doc) {
+            FirebaseFirestore.instance
+                .collection('Users')
+                .doc(FirebaseAuth.instance.currentUser.email)
+                .update({doc.id + ' Evaluation': 'Not Attempted'});
+          });
+        });
+      });
+    });
   }
 }
