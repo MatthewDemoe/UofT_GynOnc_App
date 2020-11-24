@@ -5,7 +5,6 @@ import 'package:flutter/rendering.dart';
 import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'QuestionWidget.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class EvaluationPage extends StatefulWidget {
   EvaluationPage({Key key, this.title, this.doc}) : super(key: key);
@@ -41,7 +40,6 @@ class _EvaluationPageState extends State<EvaluationPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     //If we are in 'Evaluation' then two levels up is the module name

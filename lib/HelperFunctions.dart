@@ -56,3 +56,52 @@ void updateMark({String section, String mark}) {
     {section: mark},
   );
 }
+
+Widget getFirstName({TextStyle inStyle}) {
+  //String name = '';
+  Stream<DocumentSnapshot> doc = FirebaseFirestore.instance
+      .collection('Users')
+      .doc(FirebaseAuth.instance.currentUser.email)
+      .snapshots();
+
+  return StreamBuilder<DocumentSnapshot>(
+    stream: doc,
+    builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+      if (snapshot.hasData) {
+        return Container(
+            padding: EdgeInsets.all(5),
+            child: Text(
+              snapshot.data['First Name'],
+              style: inStyle,
+            ));
+      }
+
+      return CircularProgressIndicator();
+    },
+  );
+
+  //return name;
+}
+
+Widget getLastName({TextStyle inStyle}) {
+  Stream<DocumentSnapshot> doc = FirebaseFirestore.instance
+      .collection('Users')
+      .doc(FirebaseAuth.instance.currentUser.email)
+      .snapshots();
+
+  return StreamBuilder<DocumentSnapshot>(
+    stream: doc,
+    builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+      if (snapshot.hasData) {
+        return Container(
+            padding: EdgeInsets.all(5),
+            child: Text(
+              snapshot.data['Last Name'],
+              style: inStyle,
+            ));
+      }
+
+      return CircularProgressIndicator();
+    },
+  );
+}

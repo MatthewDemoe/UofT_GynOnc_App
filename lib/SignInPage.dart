@@ -28,6 +28,7 @@ class _SignInPageState extends State<SignInPage> {
 
   bool usernameMistake = false;
   bool passwordMistake = false;
+  bool nameMistake = false;
 
   double messageSize = 14.0;
 
@@ -252,6 +253,36 @@ class _SignInPageState extends State<SignInPage> {
         child: TextFormField(
           decoration: InputDecoration(
               labelStyle:
+                  TextStyle(color: nameMistake ? Colors.red : Colors.black),
+              labelText: nameMistake ? 'First Name *' : 'First Name'),
+          onFieldSubmitted: (inName) {
+            setState(() {
+              firstName = inName;
+            });
+          },
+        ),
+      ),
+      Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(10),
+        child: TextFormField(
+          decoration: InputDecoration(
+              labelStyle:
+                  TextStyle(color: nameMistake ? Colors.red : Colors.black),
+              labelText: nameMistake ? 'Last Name *' : 'Last Name'),
+          onFieldSubmitted: (inName) {
+            setState(() {
+              lastName = inName;
+            });
+          },
+        ),
+      ),
+      Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(10),
+        child: TextFormField(
+          decoration: InputDecoration(
+              labelStyle:
                   TextStyle(color: usernameMistake ? Colors.red : Colors.black),
               labelText: usernameMistake ? 'Email Address *' : 'Email Address'),
           onFieldSubmitted: (inEmail) {
@@ -314,34 +345,6 @@ class _SignInPageState extends State<SignInPage> {
         ),
       ),
       Container(
-        alignment: Alignment.center,
-        padding: EdgeInsets.all(10),
-        child: TextFormField(
-          decoration: InputDecoration(
-              labelStyle: TextStyle(color: Colors.black),
-              labelText: 'First Name'),
-          onFieldSubmitted: (inName) {
-            setState(() {
-              firstName = inName;
-            });
-          },
-        ),
-      ),
-      Container(
-        alignment: Alignment.center,
-        padding: EdgeInsets.all(10),
-        child: TextFormField(
-          decoration: InputDecoration(
-              labelStyle: TextStyle(color: Colors.black),
-              labelText: 'Last Name'),
-          onFieldSubmitted: (inName) {
-            setState(() {
-              lastName = inName;
-            });
-          },
-        ),
-      ),
-      Container(
         padding: EdgeInsets.all(10),
         alignment: Alignment.center,
         child: RichText(
@@ -377,8 +380,17 @@ class _SignInPageState extends State<SignInPage> {
             ),
             color: Colors.cyan[700],
             onPressed: () async {
-              if (password == confirmPassword) {
+              if ((firstName == '') || (lastName == '')) {
                 setState(() {
+                  nameMistake = true;
+                });
+
+                showErrorSnackbar(
+                    context, 'Please enter a first and last name.');
+              } else if (password == confirmPassword) {
+                setState(() {
+                  nameMistake = false;
+
                   passwordMistake = false;
                 });
                 try {
@@ -453,9 +465,7 @@ class _SignInPageState extends State<SignInPage> {
           decoration: InputDecoration(
               labelStyle:
                   TextStyle(color: usernameMistake ? Colors.red : Colors.black),
-              labelText: usernameMistake
-                  ? 'University Email Address *'
-                  : 'University Email Address'),
+              labelText: usernameMistake ? 'Email Address *' : 'Email Address'),
           onFieldSubmitted: (inEmail) {
             setState(() {
               emailAddress = inEmail;
@@ -482,8 +492,6 @@ class _SignInPageState extends State<SignInPage> {
                   ..onTap = () {
                     setState(() {
                       forgotPassword = false;
-                      //emailAddress = '';
-                      //password = '';
                     });
                     print(emailAddress);
                   }),

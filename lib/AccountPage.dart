@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'package:uoft_gynonc_app/LoadingScreen.dart';
 
 class AccountPage extends StatelessWidget {
@@ -23,7 +24,7 @@ class AccountPage extends StatelessWidget {
                     children: [
                       Container(
                         alignment: Alignment.topCenter,
-                        padding: EdgeInsets.symmetric(vertical: 50),
+                        padding: EdgeInsets.symmetric(vertical: 25),
                         height: 150,
                         decoration: BoxDecoration(
                             image: DecorationImage(
@@ -32,23 +33,63 @@ class AccountPage extends StatelessWidget {
                       ),
                       Container(
                           alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(vertical: 50),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          padding: EdgeInsets.symmetric(vertical: 25),
+                          child: Wrap(
+                            alignment: WrapAlignment.center,
+                            direction: Axis.horizontal,
+                            //mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Email : ',
-                                  style: TextStyle(fontSize: fontSize)),
-                              Text(FirebaseAuth.instance.currentUser.email,
-                                  style: TextStyle(fontSize: fontSize)),
+                              Container(
+                                  padding: EdgeInsets.all(5),
+                                  child: Text(
+                                    'Name: ',
+                                    style: TextStyle(fontSize: fontSize),
+                                  )),
+                              Flexible(
+                                  child: getFirstName(
+                                      inStyle: TextStyle(fontSize: fontSize))),
+                              //style: TextStyle(fontSize: fontSize)),
+                              Flexible(
+                                  child: getLastName(
+                                      inStyle: TextStyle(fontSize: fontSize))),
+
+                              Container(
+                                  //padding: EdgeInsets.all(5),
+                                  child: IconButton(
+                                      icon: Icon(Icons.edit), onPressed: () {}))
+                              //style: TextStyle(fontSize: fontSize)),
+                            ],
+                          )),
+                      Container(
+                          //width: MediaQuery.of(context).size.width * 0.8,
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.symmetric(vertical: 50),
+                          child: Wrap(
+                            alignment: WrapAlignment.center,
+                            direction: Axis.horizontal,
+                            // mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Email : ',
+                                style: TextStyle(fontSize: fontSize),
+                                textAlign: TextAlign.center,
+                              ),
+                              Flexible(
+                                  child: Text(
+                                FirebaseAuth.instance.currentUser.email,
+                                style: TextStyle(fontSize: fontSize),
+                                textAlign: TextAlign.center,
+                              )),
                             ],
                           )),
                       Container(
                           alignment: Alignment.center,
-                          padding: EdgeInsets.all(25),
+                          padding: EdgeInsets.all(5),
                           child: RaisedButton(
                             child: Text(
                               'Reset Password',
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: fontSize),
                             ),
                             color: Colors.cyan[700],
                             onPressed: () {
@@ -74,11 +115,12 @@ class AccountPage extends StatelessWidget {
                           )),
                       Container(
                           alignment: Alignment.center,
-                          padding: EdgeInsets.all(25),
+                          padding: EdgeInsets.all(5),
                           child: RaisedButton(
                             child: Text(
                               'Sign Out',
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: fontSize),
                             ),
                             color: Colors.cyan[700],
                             onPressed: () {
