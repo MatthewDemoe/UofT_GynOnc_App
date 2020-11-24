@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/rendering.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:math';
 import 'QuestionWidget.dart';
 
 class GeneralEvaluationPage extends StatefulWidget {
@@ -16,225 +18,217 @@ class GeneralEvaluationPage extends StatefulWidget {
 }
 
 class _GeneralEvaluationPageState extends State<GeneralEvaluationPage> {
-  int currentQuestion = 0;
   //The list of question widgets in the evaluation
   List<QuestionWidget> theQuestions = new List<QuestionWidget>();
+  List<QuestionWidget> allQuestions = new List<QuestionWidget>();
+
   //All widgets we will display, contains question widgets as well as other types of widgets
   List<Widget> theWidgets = new List<Widget>();
   //After the users submit their answers, we will show which are correct/incorrect
   bool hideAnswers = true;
   int correctAnswers = 0;
 
-  DocumentReference doc;
+  int numQuestions = 5;
 
   List<int> evaluations = new List<int>();
+
+  Widget startButton;
+  Widget mark;
+  bool started = false;
+  bool submitted = false;
+
+  double percent = 0;
 
   @override
   void initState() {
     super.initState();
 
-    doc =
-        FirebaseFirestore.instance.collection('Question Bank').doc('Questions');
+    loadQuestions();
 
-    //print(doc.id);
+    mark = Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 50),
+        child: Text(
+          (percent * 100.0).round().toString() + '%',
+          style: TextStyle(
+              fontSize: 48,
+              //Interpolate between green and red based on score
+              color: Color.lerp(Colors.red, Colors.green, percent)),
+        ));
 
-    /*doc.snapshots().forEach((element) {
-      element.data().forEach((key, value) {
-        //print(value);
-        CollectionReference tmpCol =
-            FirebaseFirestore.instance.collection(value);
+    startButton = Container(
+        padding: EdgeInsets.all(50),
+        height: 200,
+        width: 200,
+        child: RaisedButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          color: Colors.cyan[700],
+          child: Text(
+            'Start',
+            style: TextStyle(fontSize: 28, color: Colors.white),
+          ),
 
-        tmpCol.snapshots().forEach((element) {
-          //print('SOME ELEMENT');
-          element.docs.forEach((e) {
-            //print(e.id);
-            theQuestions.add(QuestionWidget(
-              doc: e,
-              questionNum: 1,
-              shouldShow: false,
-            ));
-          });
-          /*element.docs.map((e) {
-            print('SOME DOCUMENT');
-            theQuestions.add(new QuestionWidget(
-              doc: e,
-              questionNum: 1,
-              shouldShow: false,
-            ));
-          });*/
-        });
-      });
-    }).whenComplete(() => setState(() {}));*/
+          //Evaluate each answer when we click submit
+          onPressed: () {
+            Random rng = new Random();
+            int idx = 0;
+            for (int i = 0; i < numQuestions; i++) {
+              idx = rng.nextInt(allQuestions.length - 1);
+              evaluations.add(0);
+
+              //allQuestions[idx]
+              QuestionWidget q = allQuestions[idx];
+
+              QuestionWidget tmp = new QuestionWidget(
+                doc: q.doc,
+                shouldShow: q.shouldShow,
+                initialNum: i + 1,
+              );
+
+              tmp.evaluationEvent.subscribe((args) {
+                evaluations[tmp.initialNum - 1] = args.value;
+              });
+
+              theQuestions.add(tmp);
+              allQuestions.removeAt(idx);
+            }
+            setState(() {
+              started = true;
+
+              theWidgets.addAll(theQuestions);
+
+              theWidgets.add(Container(
+                  padding: EdgeInsets.all(10),
+                  height: 100,
+                  width: 200,
+                  child: RaisedButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    color: Colors.cyan[700],
+                    child: Text(
+                      'Submit',
+                      style: TextStyle(fontSize: 28, color: Colors.white),
+                    ),
+
+                    //Evaluate each answer when we click submit
+                    onPressed: () {
+                      //Iterate through each question
+                      evaluations.forEach((element) {
+                        //Evaluate the submitter answer, will return 1 if correct, 0 if incorrect
+
+                        //Count the correct answers
+                        setState(() {
+                          correctAnswers += element;
+                        });
+                      });
+                      //Calculate the percentage of correct answers
+
+                      setState(() {
+                        submitted = true;
+                        percent = (correctAnswers.toDouble() /
+                            theQuestions.length.toDouble());
+                        //Clear widgets on the page(we just want to get rid of the submit button )
+                        theWidgets.clear();
+                        theWidgets = new List<Widget>();
+
+                        //Stop hiding correct answers
+                        hideAnswers = false;
+
+                        //Add the questions back
+                        theWidgets.addAll(theQuestions);
+
+                        mark = Container(
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(
+                                left: 10, right: 10, top: 10, bottom: 50),
+                            child: Text(
+                              (percent * 100.0).round().toString() + '%',
+                              style: TextStyle(
+                                  fontSize: 48,
+                                  //Interpolate between green and red based on score
+                                  color: Color.lerp(
+                                      Colors.red, Colors.green, percent)),
+                            ));
+                      });
+
+                      FirebaseFirestore.instance
+                          .collection('Users')
+                          .doc(FirebaseAuth.instance.currentUser.email)
+                          .update(
+                        {
+                          'General Evaluation':
+                              (percent * 100.0).round().toString() + '%'
+                        },
+                      );
+                    },
+                  )));
+            });
+          },
+        ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
         //Get the list of questions from firebase
-        body: StreamBuilder(
-      stream: FirebaseFirestore.instance
-          .collection('Question Bank')
-          .doc('Questions')
-          .snapshots(),
-      builder:
-          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-        if (!snapshot.hasData) {
-          return Container(
-            height: 110.0,
-            //While we wait...
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        theQuestions = formQuestions(snapshot);
-
-        /*snapshot.data.docs.map((evalReferences) {
-          evalReferences.data().map((key, eval) {
-            StreamBuilder(
-              stream: FirebaseFirestore.instance.collection(eval).snapshots(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                theQuestions.addAll(formQuestions(snapshot));
-              },
-            );
-          });
-        });*/
-
-        //theQuestions = formQuestions(snapshot);
-
-        if (theWidgets.isEmpty) {
-          theWidgets.addAll(theQuestions);
-
-          print('NUMBER OF QUESTIONS : ' + theQuestions.length.toString());
-
-          theWidgets.add(Container(
-              padding: EdgeInsets.all(10),
-              height: 100,
-              width: 200,
-              child: RaisedButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+        body: started
+            ? CustomScrollView(
+                shrinkWrap: true,
+                anchor: 0.5,
+                physics: BouncingScrollPhysics(),
+                slivers: [
+                    SliverList(
+                        delegate: SliverChildListDelegate(
+                            (submitted ? theWidgets + [mark] : theWidgets)))
+                  ])
+            : Container(
+                alignment: Alignment.center,
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    Container(
+                      alignment: Alignment.topCenter,
+                      padding: EdgeInsets.symmetric(vertical: 50),
+                      height: 150,
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                              fit: BoxFit.fitHeight,
+                              image: AssetImage('assets/GynOnc_Logo.png'))),
+                    ),
+                    startButton
+                  ],
                 ),
-                color: Colors.cyan[700],
-                child: Text(
-                  'Submit',
-                  style: TextStyle(fontSize: 28),
-                ),
-
-                //Evaluate each answer when we click submit
-                onPressed: () {
-                  //initialize the amount of correct answers
-                  theQuestions.forEach((element) {
-                    element.showAnswers();
-                  });
-                  //Iterate through each question
-                  evaluations.forEach((element) {
-                    //Evaluate the submitter answer, will return 1 if correct, 0 if incorrect
-                    //int tmp = element.evaluateAnswer();
-
-                    //Count the correct answers
-                    correctAnswers += element;
-                  });
-                  //Calculate the percentage of correct answers
-                  double percent = (correctAnswers.toDouble() /
-                      theQuestions.length.toDouble());
-
-                  setState(() {
-                    //Clear widgets on the page(we just want to get rid of the submit button )
-                    theWidgets.clear();
-                    theWidgets = new List<Widget>();
-
-                    //Stop hiding correct answers
-                    hideAnswers = false;
-
-                    //Add the questions back
-                    theWidgets.addAll(theQuestions);
-
-                    //Add a widget showing the evaluation results
-                    theWidgets.add(new Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.only(
-                            left: 10, right: 10, top: 10, bottom: 50),
-                        child: Text(
-                          (percent * 100.0).round().toString() + '%',
-                          style: TextStyle(
-                              fontSize: 48,
-                              //Interpolate between green and red based on score
-                              color: Color.lerp(
-                                  Colors.red, Colors.green, percent)),
-                        )));
-                  });
-                },
-              )));
-        }
-
-        return CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
-          SliverList(
-              delegate: SliverChildListDelegate(
-            theWidgets,
-          ))
-        ]);
-      },
-    ));
+              ));
   }
 
-  List<QuestionWidget> formQuestions(AsyncSnapshot<DocumentSnapshot> snapshot) {
-    //Initialize a question counter,
-    //this is just used to add a number at the beginning of the question's text
+  Future<void> loadQuestions() async {
+    DocumentReference doc =
+        FirebaseFirestore.instance.collection('Question Bank').doc('Questions');
+
     int counter = 0;
-    List<QuestionWidget> tmpQuestions = new List<QuestionWidget>();
+    doc.snapshots().forEach((element) {
+      element.data().forEach((key, value) {
+        CollectionReference tmpCol =
+            FirebaseFirestore.instance.collection(value);
 
-    snapshot.data.data().forEach((key, value) {
-      CollectionReference tmpCol = FirebaseFirestore.instance.collection(value);
+        tmpCol.snapshots().forEach((element) {
+          element.docs.forEach((e) {
+            counter++;
 
-      tmpCol.snapshots().forEach((element) {
-        //print('SOME ELEMENT');
-        element.docs.forEach((e) {
-          //print(e.id);
-          counter++;
-
-          tmpQuestions.add(QuestionWidget(
-            doc: e,
-            questionNum: counter,
-            shouldShow: false,
-          ));
+            allQuestions.add(QuestionWidget(
+              doc: e,
+              initialNum: counter,
+              shouldShow: false,
+            ));
+          });
         });
       });
     });
-
-    return tmpQuestions;
-    /*snapshot.data.docs.map((question) {
-      counter = counter + 1;
-
-      QuestionWidget tmp = QuestionWidget(
-        doc: question,
-        questionNum: counter,
-        shouldShow: false,
-      );
-
-      evaluations.add(0);
-
-      tmp.evaluationEvent.subscribe((args) {
-        evaluations[tmp.questionNum - 1] = args.value;
-      });
-
-      return tmp;
-    }).toList();*/
-
-    /* snapshot.data.data().forEach((key, value) {
-      CollectionReference tmpCol = FirebaseFirestore.instance.collection(value);
-
-      tmpCol.snapshots().forEach((element) {
-        //print('SOME ELEMENT');
-        element.docs.forEach((e) {
-          //print(e.id);
-          theQuestions.add(QuestionWidget(
-            doc: e,
-            questionNum: 1,
-            shouldShow: false,
-          ));
-        });
-      });
-    });*/
   }
 }

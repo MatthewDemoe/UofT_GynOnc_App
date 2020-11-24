@@ -31,9 +31,9 @@ class ModuleButton extends StatelessWidget {
               alignment: Alignment.center,
               padding: EdgeInsets.symmetric(horizontal: 5),
               width: MediaQuery.of(context).size.width * 0.66,
-              //Get the name of this module, stored in the firestore field 'name'
+              //Get the name of this module
               child: Text(
-                doc.data()['name'],
+                doc.id,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontSize: 18,
@@ -101,7 +101,7 @@ class ModuleButton extends StatelessWidget {
 
                   //The image we are waiting to receive
                   future: getImage(
-                    doc.data()['icon'],
+                    doc.data()['Icon'],
                   )),
             ),
           ],

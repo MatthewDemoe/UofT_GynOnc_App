@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/rendering.dart';
 import 'QuestionWidget.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class EvaluationPage extends StatefulWidget {
   EvaluationPage({Key key, this.title, this.doc}) : super(key: key);
@@ -33,6 +34,19 @@ class _EvaluationPageState extends State<EvaluationPage> {
   List<Widget> mark = new List<Widget>();
 
   List<int> evaluations = new List<int>();
+
+  //The name of the module we are in
+  String moduleID;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    //If we are in 'Evaluation' then two levels up is the module name
+    //We'll use this to store user scores
+    moduleID = widget.doc.reference.parent.parent.id;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +117,16 @@ class _EvaluationPageState extends State<EvaluationPage> {
                                 Color.lerp(Colors.red, Colors.green, percent)),
                       )));
 
+                  FirebaseFirestore.instance
+                      .collection('Users')
+                      .doc(FirebaseAuth.instance.currentUser.email)
+                      .update(
+                    {
+                      moduleID + ' Evaluation':
+                          (percent * 100.0).round().toString() + '%'
+                    },
+                  );
+
                   mark.add(Container(
                       padding: EdgeInsets.only(bottom: 25),
                       child: RichText(
@@ -147,18 +171,22 @@ class _EvaluationPageState extends State<EvaluationPage> {
     return snapshot.data.docs.map((question) {
       counter = counter + 1;
 
-      print(question.data()['Question']);
+      //print(question.data()['Question']);
       QuestionWidget tmp = QuestionWidget(
         doc: question,
-        questionNum: counter,
+        initialNum: counter,
         shouldShow: true,
       );
 
       evaluations.add(0);
 
       tmp.evaluationEvent.subscribe((args) {
-        evaluations[tmp.questionNum - 1] = args.value;
+        evaluations[tmp.initialNum - 1] = args.value;
       });
+
+      //This is the name of the module
+      //print(widget.doc.reference.parent.parent.id);
+      //widget.doc.reference.parent.parent
 
       return tmp;
     }).toList();

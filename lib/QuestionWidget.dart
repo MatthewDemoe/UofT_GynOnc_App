@@ -9,7 +9,7 @@ class QuestionWidget extends StatefulWidget {
   QuestionWidget({
     Key key,
     this.doc,
-    this.questionNum,
+    this.initialNum,
     this.shouldShow = true,
   }) : super(key: key);
 
@@ -19,7 +19,7 @@ class QuestionWidget extends StatefulWidget {
   //The question document we are building from
   final QueryDocumentSnapshot doc;
   //The question number we are on
-  final int questionNum;
+  final int initialNum;
   final bool shouldShow;
 
   void showAnswers() {
@@ -27,14 +27,6 @@ class QuestionWidget extends StatefulWidget {
   }
 
   _QuestionWidgetState createState() => _QuestionWidgetState();
-
-  //Evaluate answer based on state of this widget
-  //Returns 1 for correct answers or 0 for incorrect
-  int evaluateAnswer() {
-    return 0;
-    //int tmp = evaluateAnswer();
-    //return tmp;
-  }
 }
 
 class _QuestionWidgetState extends State<QuestionWidget>
@@ -49,12 +41,15 @@ class _QuestionWidgetState extends State<QuestionWidget>
   Widget img;
 
   bool wantKeepAlive = true;
+  int questionNum;
 
   //Returns a list of answer widgets for this question
 
   @override
   initState() {
     super.initState();
+    questionNum = widget.initialNum;
+
     //Load the image in once, so that we don't keep reading from the database
     //Each time the widget is built
     if (widget.doc.data().keys.contains('Image'))
@@ -85,7 +80,7 @@ class _QuestionWidgetState extends State<QuestionWidget>
             padding: EdgeInsets.all(10),
             child: Text(
               //The question number we are on
-              widget.questionNum.toString() +
+              questionNum.toString() +
                   '. ' +
                   //The text of the question, from firebase
                   widget.doc.data()['Question'],
@@ -176,6 +171,10 @@ class _QuestionWidgetState extends State<QuestionWidget>
     }
 
     return null;
+  }
+
+  void setQuestionNum(int qNum) {
+    questionNum = qNum;
   }
 }
 
