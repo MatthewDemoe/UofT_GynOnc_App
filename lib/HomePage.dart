@@ -121,7 +121,9 @@ class _HomePageState extends State<HomePage> {
               //Also add some additional buttons
 
               drawer.add(new ListTile(
-				leading: Icon(Icons.assignment),                onTap: () {
+                leading: Icon(Icons.assignment),
+                title: Text('Overall Test'),
+                onTap: () {
                   Navigator.pop(context);
                   Navigator.push(
                       context,
@@ -175,8 +177,9 @@ class _HomePageState extends State<HomePage> {
     //Iterating through each document in the snapshot(each category)
     return snapshot.data.docs
         .map((doc) => new ListTile(
-              title: new Text(doc.id,
-			leading: Icon(Icons.receipt_long_outlined),              onTap: () {
+              title: new Text(doc.id),
+              leading: Icon(Icons.receipt_long_outlined),
+              onTap: () {
                 setState(() {
                   Navigator.pop(context);
                   //When you tap on a list tile, create a new list of buttons to be displayed
@@ -203,12 +206,13 @@ class _HomePageState extends State<HomePage> {
         .update({'General Evaluation': 'Not Attempted'});
 
     FirebaseFirestore.instance
-        .collection('Module Categories')
+        .collection('Module Categories ')
         .snapshots()
         .forEach((element) {
       element.docs.forEach((category) {
         category.reference.collection('Modules').snapshots().forEach((module) {
           module.docs.forEach((doc) {
+            print(doc.id);
             FirebaseFirestore.instance
                 .collection('Users')
                 .doc(FirebaseAuth.instance.currentUser.email)
