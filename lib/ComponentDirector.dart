@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'VideoPage.dart';
 import 'EvaluationPage.dart';
 import 'ReadingPage.dart';
@@ -55,7 +56,7 @@ class _ComponentDirectorState extends State<ComponentDirector> {
         return Scaffold(
           body: pages[widget.pageNum],
           appBar: AppBar(
-            backgroundColor: Colors.cyan[700],
+            backgroundColor: getAppColor(),
             //Home button that will return you to the main page
             leading: IconButton(
               icon: Icon(Icons.home),

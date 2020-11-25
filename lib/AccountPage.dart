@@ -3,18 +3,27 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'package:uoft_gynonc_app/LoadingScreen.dart';
 
-class AccountPage extends StatelessWidget {
+class AccountPage extends StatefulWidget {
   AccountPage({Key key, this.title = 'My Account'}) : super(key: key);
 
   final String title;
-  final double fontSize = 18;
+
+  @override
+  _AccountPageState createState() => _AccountPageState();
+}
+
+class _AccountPageState extends State<AccountPage> {
+  String newFirstName = '';
+  String newLastName = '';
+
+  bool editingName = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           elevation: 2,
-          title: Text(title),
+          title: Text(widget.title),
         ),
         body: Builder(
             builder: (context) => Container(
@@ -35,31 +44,100 @@ class AccountPage extends StatelessWidget {
                           alignment: Alignment.center,
                           padding: EdgeInsets.symmetric(vertical: 25),
                           child: Wrap(
-                            alignment: WrapAlignment.center,
-                            direction: Axis.horizontal,
-                            //mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                  padding: EdgeInsets.all(5),
-                                  child: Text(
-                                    'Name: ',
-                                    style: TextStyle(fontSize: fontSize),
-                                  )),
-                              Flexible(
-                                  child: getFirstName(
-                                      inStyle: TextStyle(fontSize: fontSize))),
-                              //style: TextStyle(fontSize: fontSize)),
-                              Flexible(
-                                  child: getLastName(
-                                      inStyle: TextStyle(fontSize: fontSize))),
+                              alignment: WrapAlignment.center,
+                              direction: Axis.horizontal,
+                              children: editingName
+                                  ? [
+                                      Container(
+                                          padding: EdgeInsets.all(10),
+                                          child: TextFormField(
+                                            decoration: InputDecoration(
+                                              labelText: 'New First Name',
+                                            ),
+                                            onFieldSubmitted: (inName) {
+                                              setState(() {
+                                                newFirstName = inName;
+                                              });
+                                            },
+                                          )),
+                                      Container(
+                                          padding: EdgeInsets.all(10),
+                                          child: TextFormField(
+                                            decoration: InputDecoration(
+                                              labelText: 'New Last Name',
+                                            ),
+                                            onFieldSubmitted: (inName) {
+                                              setState(() {
+                                                newLastName = inName;
+                                              });
+                                            },
+                                          )),
+                                      Container(
+                                          padding: EdgeInsets.all(10),
+                                          child: RaisedButton(
+                                            color: getAppColor(),
+                                            child: Text(
+                                              'Save',
+                                              style: getButtonTextStyle(),
+                                            ),
+                                            onPressed: () {
+                                              if ((newFirstName == '') ||
+                                                  (newLastName == '')) {
+                                                showErrorSnackbar(context,
+                                                    'Please enter a first and last name');
+                                              } else {
+                                                setNewName(
+                                                    firstName: newFirstName,
+                                                    lastName: newLastName);
 
-                              Container(
-                                  //padding: EdgeInsets.all(5),
-                                  child: IconButton(
-                                      icon: Icon(Icons.edit), onPressed: () {}))
-                              //style: TextStyle(fontSize: fontSize)),
-                            ],
-                          )),
+                                                setState(() {
+                                                  editingName = false;
+                                                });
+                                              }
+                                            },
+                                          )),
+                                      Container(
+                                          padding: EdgeInsets.all(10),
+                                          child: RaisedButton(
+                                            color: getAppColor(),
+                                            child: Text(
+                                              'Cancel',
+                                              style: getButtonTextStyle(),
+                                            ),
+                                            onPressed: () {
+                                              setState(() {
+                                                editingName = false;
+                                              });
+                                            },
+                                          )),
+                                    ]
+                                  : <Widget>[
+                                      Container(
+                                          padding: EdgeInsets.all(5),
+                                          child: Text(
+                                            'Name: ',
+                                            style: TextStyle(
+                                                fontSize: getDefaultFontSize()),
+                                          )),
+                                      Flexible(
+                                          child: getFirstName(
+                                              inStyle: TextStyle(
+                                                  fontSize:
+                                                      getDefaultFontSize()))),
+                                      Flexible(
+                                          child: getLastName(
+                                              inStyle: TextStyle(
+                                                  fontSize:
+                                                      getDefaultFontSize()))),
+                                      Container(
+                                          child: IconButton(
+                                              icon: Icon(Icons.edit),
+                                              onPressed: () {
+                                                setState(() {
+                                                  editingName = true;
+                                                });
+                                              }))
+                                    ])),
                       Container(
                           //width: MediaQuery.of(context).size.width * 0.8,
                           alignment: Alignment.center,
@@ -71,13 +149,15 @@ class AccountPage extends StatelessWidget {
                             children: [
                               Text(
                                 'Email : ',
-                                style: TextStyle(fontSize: fontSize),
+                                style:
+                                    TextStyle(fontSize: getDefaultFontSize()),
                                 textAlign: TextAlign.center,
                               ),
                               Flexible(
                                   child: Text(
                                 FirebaseAuth.instance.currentUser.email,
-                                style: TextStyle(fontSize: fontSize),
+                                style:
+                                    TextStyle(fontSize: getDefaultFontSize()),
                                 textAlign: TextAlign.center,
                               )),
                             ],
@@ -88,29 +168,16 @@ class AccountPage extends StatelessWidget {
                           child: RaisedButton(
                             child: Text(
                               'Reset Password',
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: fontSize),
+                              style: getButtonTextStyle(),
                             ),
-                            color: Colors.cyan[700],
+                            color: getAppColor(),
                             onPressed: () {
                               FirebaseAuth mAuth = FirebaseAuth.instance;
                               mAuth.sendPasswordResetEmail(
                                   email: mAuth.currentUser.email);
 
-                              Scaffold.of(context).showSnackBar(SnackBar(
-                                content: Row(children: [
-                                  Container(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 10),
-                                      child: Icon(Icons.warning)),
-                                  Text('Reset link sent to your email.'),
-                                ]),
-                                action: SnackBarAction(
-                                    label: 'Okay',
-                                    onPressed: () {
-                                      //Dismiss
-                                    }),
-                              ));
+                              showSnackbar(
+                                  context, 'Reset link sent to your email.');
                             },
                           )),
                       Container(
@@ -119,10 +186,9 @@ class AccountPage extends StatelessWidget {
                           child: RaisedButton(
                             child: Text(
                               'Sign Out',
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: fontSize),
+                              style: getButtonTextStyle(),
                             ),
-                            color: Colors.cyan[700],
+                            color: getAppColor(),
                             onPressed: () {
                               FirebaseAuth mAuth = FirebaseAuth.instance;
                               mAuth.signOut();
@@ -133,7 +199,7 @@ class AccountPage extends StatelessWidget {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => LoadingScreen(
-                                            key: key,
+                                            key: widget.key,
                                           )));
                             },
                           )),

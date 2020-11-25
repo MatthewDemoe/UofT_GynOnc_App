@@ -21,7 +21,7 @@ class ModuleButton extends StatelessWidget {
       //The actual button
       child: RaisedButton(
         elevation: 10.0,
-        color: Colors.cyan[700],
+        color: getAppColor(),
         padding: EdgeInsets.all(5),
         //The contents of the button, text and icon
         child: Row(
@@ -35,10 +35,7 @@ class ModuleButton extends StatelessWidget {
               child: Text(
                 doc.id,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
+                style: getButtonTextStyle(),
               ),
             ),
             //This is the icon on the right of the button

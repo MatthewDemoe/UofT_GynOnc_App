@@ -73,7 +73,7 @@ class ReadingPage extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 15, vertical: 25),
             child: Text(
               doc.data()['Text'],
-              style: TextStyle(fontSize: 18),
+              style: TextStyle(fontSize: getDefaultFontSize()),
               textAlign: TextAlign.center,
             ));
       }
@@ -115,7 +115,7 @@ class ReadingPage extends StatelessWidget {
                   style: TextStyle(
                       color: Colors.blue,
                       decoration: TextDecoration.underline,
-                      fontSize: 18),
+                      fontSize: getDefaultFontSize()),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
                       launch(doc.data()['Link']);
@@ -123,7 +123,8 @@ class ReadingPage extends StatelessWidget {
 
             return TextSpan(
                 text: doc.data()['Text'],
-                style: TextStyle(color: Colors.black, fontSize: 18));
+                style: TextStyle(
+                    color: Colors.black, fontSize: getDefaultFontSize()));
           }).toList())),
     );
   }

@@ -64,7 +64,7 @@ class _GeneralEvaluationPageState extends State<GeneralEvaluationPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          color: Colors.cyan[700],
+          color: getAppColor(),
           child: Text(
             'Start',
             style: TextStyle(fontSize: 28, color: Colors.white),
@@ -107,7 +107,7 @@ class _GeneralEvaluationPageState extends State<GeneralEvaluationPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    color: Colors.cyan[700],
+                    color: getAppColor(),
                     child: Text(
                       'Submit',
                       style: TextStyle(fontSize: 28, color: Colors.white),
@@ -155,7 +155,7 @@ class _GeneralEvaluationPageState extends State<GeneralEvaluationPage> {
                       });
 
                       updateMark(
-                          section: 'Overall Evaluation',
+                          section: 'Overall',
                           mark: (percent * 100.0).round().toString() + '%');
                     },
                   )));

@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'package:uoft_gynonc_app/LoadingScreen.dart';
 import 'package:uoft_gynonc_app/SignInPage.dart';
 import 'HomePage.dart';
@@ -104,7 +105,7 @@ class _VerificationPageState extends State<VerificationPage> {
                         'Verify',
                         style: TextStyle(fontSize: 14, color: Colors.white),
                       ),
-                      color: Colors.cyan[700],
+                      color: getAppColor(),
                       onPressed: () {
                         theUser.reload();
 

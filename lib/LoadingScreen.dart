@@ -16,7 +16,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     FirebaseAuth.instance.authStateChanges().listen((User user) {

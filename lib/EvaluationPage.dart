@@ -77,7 +77,7 @@ class _EvaluationPageState extends State<EvaluationPage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                color: Colors.cyan[700],
+                color: getAppColor(),
                 child: Text(
                   'Submit',
                   style: TextStyle(fontSize: 28),
@@ -117,18 +117,8 @@ class _EvaluationPageState extends State<EvaluationPage> {
                       )));
 
                   updateMark(
-                      section: moduleID + ' Evaluation',
+                      section: moduleID,
                       mark: (percent * 100.0).round().toString() + '%');
-
-                  /*FirebaseFirestore.instance
-                      .collection('Users')
-                      .doc(FirebaseAuth.instance.currentUser.email)
-                      .update(
-                    {
-                      moduleID + ' Evaluation':
-                          (percent * 100.0).round().toString() + '%'
-                    },
-                  );*/
 
                   mark.add(Container(
                       padding: EdgeInsets.only(bottom: 25),
@@ -138,13 +128,14 @@ class _EvaluationPageState extends State<EvaluationPage> {
                             TextSpan(
                                 text: 'Click ',
                                 style: TextStyle(
-                                    color: Colors.black, fontSize: 18)),
+                                    color: Colors.black,
+                                    fontSize: getDefaultFontSize())),
                             TextSpan(
                                 text: 'here',
                                 style: TextStyle(
                                     color: Colors.blue,
                                     decoration: TextDecoration.underline,
-                                    fontSize: 18),
+                                    fontSize: getDefaultFontSize()),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
                                     launch(widget.doc.data()['Link']);
@@ -152,7 +143,8 @@ class _EvaluationPageState extends State<EvaluationPage> {
                             TextSpan(
                                 text: ' for further reading.',
                                 style: TextStyle(
-                                    color: Colors.black, fontSize: 18)),
+                                    color: Colors.black,
+                                    fontSize: getDefaultFontSize())),
                           ]))));
                 },
               ));

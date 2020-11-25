@@ -109,7 +109,7 @@ class _HomePageState extends State<HomePage> {
                   child: DrawerHeader(
                     child: header,
                     decoration: BoxDecoration(
-                      color: Colors.cyan[700],
+                      color: getAppColor(),
                     ),
                     margin: EdgeInsets.all(0),
                   ),

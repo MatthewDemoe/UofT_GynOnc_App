@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'package:uoft_gynonc_app/VerificationPage.dart';
 import 'HomePage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -200,7 +201,7 @@ class _SignInPageState extends State<SignInPage> {
               'Next',
               style: TextStyle(fontSize: 14, color: Colors.white),
             ),
-            color: Colors.cyan[700],
+            color: getAppColor(),
             onPressed: () async {
               try {
                 UserCredential userCredential = await FirebaseAuth.instance
@@ -376,9 +377,9 @@ class _SignInPageState extends State<SignInPage> {
           child: RaisedButton(
             child: Text(
               'Next',
-              style: TextStyle(fontSize: 14, color: Colors.white),
+              style: getButtonTextStyle(),
             ),
-            color: Colors.cyan[700],
+            color: getAppColor(),
             onPressed: () async {
               if ((firstName == '') || (lastName == '')) {
                 setState(() {
@@ -505,9 +506,9 @@ class _SignInPageState extends State<SignInPage> {
           child: RaisedButton(
             child: Text(
               'Next',
-              style: TextStyle(fontSize: 14, color: Colors.white),
+              style: getButtonTextStyle(),
             ),
-            color: Colors.cyan[700],
+            color: getAppColor(),
             onPressed: () {
               FirebaseAuth mAuth = FirebaseAuth.instance;
               mAuth.sendPasswordResetEmail(email: emailAddress);
@@ -517,37 +518,13 @@ class _SignInPageState extends State<SignInPage> {
     ];
   }
 
-  void showErrorSnackbar(BuildContext context, String message) {
-    Scaffold.of(context).showSnackBar(SnackBar(
-      content: Row(children: [
-        Container(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            child: Icon(Icons.warning)),
-        Text(message),
-      ]),
-      action: SnackBarAction(
-          label: 'Okay',
-          onPressed: () {
-            //Dismiss
-          }),
-    ));
-  }
-
   void initializeUser() {
     FirebaseFirestore.instance
         .collection('Users')
         .doc(FirebaseAuth.instance.currentUser.email)
         .set({});
 
-    FirebaseFirestore.instance
-        .collection('Users')
-        .doc(FirebaseAuth.instance.currentUser.email)
-        .update({'First Name': firstName});
-
-    FirebaseFirestore.instance
-        .collection('Users')
-        .doc(FirebaseAuth.instance.currentUser.email)
-        .update({'Last Name': lastName});
+    setNewName(firstName: firstName, lastName: lastName);
 
     FirebaseFirestore.instance
         .collection('Users')
@@ -564,13 +541,32 @@ class _SignInPageState extends State<SignInPage> {
         .update({'Overall Evaluation': 'Not Attempted'});
 
     FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser.email)
+        .collection('Evaluations')
+        .doc('Marks')
+        .collection('Modules')
+        .doc('Overall Evaluation')
+        .set({'Attempts': 0});
+
+    FirebaseFirestore.instance
         .collection('Module Categories ')
         .snapshots()
         .forEach((element) {
       element.docs.forEach((category) {
         category.reference.collection('Modules').snapshots().forEach((module) {
           module.docs.forEach((doc) {
-            print(doc.id);
+            //print(doc.id);
+
+            FirebaseFirestore.instance
+                .collection('Users')
+                .doc(FirebaseAuth.instance.currentUser.email)
+                .collection('Evaluations')
+                .doc('Marks')
+                .collection('Modules')
+                .doc(doc.id)
+                .set({'Attempts': 0});
+
             FirebaseFirestore.instance
                 .collection('Users')
                 .doc(FirebaseAuth.instance.currentUser.email)
