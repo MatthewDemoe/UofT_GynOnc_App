@@ -121,8 +121,8 @@ Future<void> updateMark({String section, String mark}) async {
         .doc(section)
         .update(
           (attempts < 10)
-              ? {'Attempt ' + attempts.toString(): mark}
-              : {'Attempt 0' + attempts.toString(): mark},
+              ? {'Attempt 0' + attempts.toString(): mark}
+              : {'Attempt ' + attempts.toString(): mark},
         );
   } else {
     print('NO DATA IN SNAPSHOT?');
@@ -139,6 +139,38 @@ void setNewName({String firstName, String lastName}) {
       .collection('Users')
       .doc(FirebaseAuth.instance.currentUser.email)
       .update({'Last Name': lastName});
+}
+
+Future<String> getFirstNameString() async {
+  Stream<DocumentSnapshot> doc = FirebaseFirestore.instance
+      .collection('Users')
+      .doc(FirebaseAuth.instance.currentUser.email)
+      .snapshots();
+
+  StreamIterator<DocumentSnapshot> iterator =
+      StreamIterator<DocumentSnapshot>(doc);
+
+  if (await iterator.moveNext()) {
+    return iterator.current.data()['First Name'];
+  }
+
+  return '';
+}
+
+Future<String> getLastNameString() async {
+  Stream<DocumentSnapshot> doc = FirebaseFirestore.instance
+      .collection('Users')
+      .doc(FirebaseAuth.instance.currentUser.email)
+      .snapshots();
+
+  StreamIterator<DocumentSnapshot> iterator =
+      StreamIterator<DocumentSnapshot>(doc);
+
+  if (await iterator.moveNext()) {
+    return iterator.current.data()['Last Name'];
+  }
+
+  return '';
 }
 
 Widget getFirstName({TextStyle inStyle}) {

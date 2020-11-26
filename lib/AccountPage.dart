@@ -13,10 +13,17 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
-  String newFirstName = '';
-  String newLastName = '';
+  String firstName = '';
+  String lastName = '';
 
   bool editingName = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    loadNames();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,24 +58,26 @@ class _AccountPageState extends State<AccountPage> {
                                       Container(
                                           padding: EdgeInsets.all(10),
                                           child: TextFormField(
+                                            initialValue: firstName,
                                             decoration: InputDecoration(
                                               labelText: 'New First Name',
                                             ),
                                             onFieldSubmitted: (inName) {
                                               setState(() {
-                                                newFirstName = inName;
+                                                firstName = inName;
                                               });
                                             },
                                           )),
                                       Container(
                                           padding: EdgeInsets.all(10),
                                           child: TextFormField(
+                                            initialValue: lastName,
                                             decoration: InputDecoration(
                                               labelText: 'New Last Name',
                                             ),
                                             onFieldSubmitted: (inName) {
                                               setState(() {
-                                                newLastName = inName;
+                                                lastName = inName;
                                               });
                                             },
                                           )),
@@ -81,14 +90,14 @@ class _AccountPageState extends State<AccountPage> {
                                               style: getButtonTextStyle(),
                                             ),
                                             onPressed: () {
-                                              if ((newFirstName == '') ||
-                                                  (newLastName == '')) {
+                                              if ((firstName == '') ||
+                                                  (lastName == '')) {
                                                 showErrorSnackbar(context,
                                                     'Please enter a first and last name');
                                               } else {
                                                 setNewName(
-                                                    firstName: newFirstName,
-                                                    lastName: newLastName);
+                                                    firstName: firstName,
+                                                    lastName: lastName);
 
                                                 setState(() {
                                                   editingName = false;
@@ -206,5 +215,10 @@ class _AccountPageState extends State<AccountPage> {
                     ],
                   ),
                 )));
+  }
+
+  Future<void> loadNames() async {
+    firstName = await getFirstNameString();
+    lastName = await getLastNameString();
   }
 }

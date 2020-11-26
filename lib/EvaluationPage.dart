@@ -5,6 +5,8 @@ import 'package:flutter/rendering.dart';
 import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'QuestionWidget.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:async';
+import 'EvaluationFAB.dart';
 
 class EvaluationPage extends StatefulWidget {
   EvaluationPage({Key key, this.title, this.doc}) : super(key: key);
@@ -12,6 +14,8 @@ class EvaluationPage extends StatefulWidget {
   final String title;
   //The evaluation document in firebase
   final QueryDocumentSnapshot doc;
+
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   _EvaluationPageState createState() => new _EvaluationPageState();
@@ -38,6 +42,8 @@ class _EvaluationPageState extends State<EvaluationPage> {
   //The name of the module we are in
   String moduleID;
 
+  bool started = false;
+
   @override
   void initState() {
     super.initState();
@@ -45,145 +51,165 @@ class _EvaluationPageState extends State<EvaluationPage> {
     //If we are in 'Evaluation' then two levels up is the module name
     //We'll use this to store user scores
     moduleID = widget.doc.reference.parent.parent.id;
+
+    loadQuestions();
+
+    submitButton = Container(
+        padding: EdgeInsets.all(10),
+        height: 100,
+        width: 200,
+        child: RaisedButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          color: getAppColor(),
+          child: Text(
+            'Submit',
+            style: TextStyle(fontSize: 28),
+          ),
+
+          //Evaluate each answer when we click submit
+          onPressed: () {
+            //initialize the amount of correct answers
+            theQuestions.forEach((element) {
+              element.showAnswers();
+            });
+            //Iterate through each question
+            evaluations.forEach((element) {
+              //Count the correct answers
+              correctAnswers += element;
+            });
+            //Calculate the percentage of correct answers
+
+            setState(() {
+              percent =
+                  (correctAnswers.toDouble() / theQuestions.length.toDouble());
+
+              //Stop hiding correct answers
+              hideAnswers = false;
+            });
+            mark.add(new Container(
+                alignment: Alignment.center,
+                padding:
+                    EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
+                child: Text(
+                  (percent * 100.0).round().toString() + '%',
+                  style: TextStyle(
+                      fontSize: 48,
+                      //Interpolate between green and red based on score
+                      color: Color.lerp(Colors.red, Colors.green, percent)),
+                )));
+
+            updateMark(
+                section: moduleID,
+                mark: (percent * 100.0).round().toString() + '%');
+
+            mark.add(Container(
+                padding: EdgeInsets.only(bottom: 25),
+                child: RichText(
+                    textAlign: TextAlign.center,
+                    text: new TextSpan(children: [
+                      TextSpan(
+                          text: 'Click ',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: getDefaultFontSize())),
+                      TextSpan(
+                          text: 'here',
+                          style: TextStyle(
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline,
+                              fontSize: getDefaultFontSize()),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              launch(widget.doc.data()['Link']);
+                            }),
+                      TextSpan(
+                          text: ' for further reading.',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: getDefaultFontSize())),
+                    ]))));
+          },
+        ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        //Get the list of questions from firebase
-        body: StreamBuilder(
-      stream: FirebaseFirestore.instance
-          .collection(widget.doc.reference.collection('Questions').path)
-          .snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (!snapshot.hasData) {
-          return Container(
-            height: 110.0,
-            width: 110.0,
-            //While we wait...
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        theQuestions = formQuestions(snapshot);
-
-        if (theWidgets.isEmpty) {
-          theWidgets.addAll(theQuestions);
-          submitButton = Container(
-              padding: EdgeInsets.all(10),
-              height: 100,
-              width: 200,
-              child: RaisedButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                color: getAppColor(),
-                child: Text(
-                  'Submit',
-                  style: TextStyle(fontSize: 28),
-                ),
-
-                //Evaluate each answer when we click submit
-                onPressed: () {
-                  //initialize the amount of correct answers
-                  theQuestions.forEach((element) {
-                    element.showAnswers();
-                  });
-                  //Iterate through each question
-                  evaluations.forEach((element) {
-                    //Count the correct answers
-                    correctAnswers += element;
-                  });
-                  //Calculate the percentage of correct answers
-
-                  setState(() {
-                    percent = (correctAnswers.toDouble() /
-                        theQuestions.length.toDouble());
-
-                    //Stop hiding correct answers
-                    hideAnswers = false;
-                  });
-                  mark.add(new Container(
+        key: widget.scaffoldKey,
+        floatingActionButton: EvaluationFAB(),
+        body: started
+            ? CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
+                SliverList(
+                    delegate: SliverChildListDelegate(
+                        theWidgets + ((hideAnswers) ? [submitButton] : mark)))
+              ])
+            : Container(
+                alignment: Alignment.center,
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    Container(
                       alignment: Alignment.center,
-                      padding: EdgeInsets.only(
-                          left: 10, right: 10, top: 10, bottom: 10),
-                      child: Text(
-                        (percent * 100.0).round().toString() + '%',
-                        style: TextStyle(
-                            fontSize: 48,
-                            //Interpolate between green and red based on score
-                            color:
-                                Color.lerp(Colors.red, Colors.green, percent)),
-                      )));
-
-                  updateMark(
-                      section: moduleID,
-                      mark: (percent * 100.0).round().toString() + '%');
-
-                  mark.add(Container(
-                      padding: EdgeInsets.only(bottom: 25),
-                      child: RichText(
-                          textAlign: TextAlign.center,
-                          text: new TextSpan(children: [
-                            TextSpan(
-                                text: 'Click ',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: getDefaultFontSize())),
-                            TextSpan(
-                                text: 'here',
-                                style: TextStyle(
-                                    color: Colors.blue,
-                                    decoration: TextDecoration.underline,
-                                    fontSize: getDefaultFontSize()),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    launch(widget.doc.data()['Link']);
-                                  }),
-                            TextSpan(
-                                text: ' for further reading.',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: getDefaultFontSize())),
-                          ]))));
-                },
-              ));
-        }
-
-        return CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
-          SliverList(
-              delegate: SliverChildListDelegate(
-                  theWidgets + ((hideAnswers) ? [submitButton] : mark)))
-        ]);
-      },
-    ));
+                      padding: EdgeInsets.symmetric(vertical: 50),
+                      height: 150,
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                        fit: BoxFit.fitHeight,
+                        image: AssetImage('assets/GynOnc_Logo.png'),
+                      )),
+                    ),
+                    Container(
+                        padding: EdgeInsets.all(50),
+                        height: 200,
+                        width: 200,
+                        child: RaisedButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                            color: getAppColor(),
+                            child: Text(
+                              'Start',
+                              style:
+                                  TextStyle(fontSize: 28, color: Colors.white),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                started = true;
+                              });
+                            }))
+                  ],
+                ))); //
   }
 
-  List<QuestionWidget> formQuestions(AsyncSnapshot<QuerySnapshot> snapshot) {
-    //Initialize a question counter,
-    //this is just used to add a number at the beginning of the question's text
+  Future<void> loadQuestions() async {
+    Stream<QuerySnapshot> snap = FirebaseFirestore.instance
+        .collection(widget.doc.reference.collection('Questions').path)
+        .snapshots();
+
+    StreamIterator<QuerySnapshot> iterator =
+        StreamIterator<QuerySnapshot>(snap);
+
     int counter = 0;
-    return snapshot.data.docs.map((question) {
-      counter = counter + 1;
+    while (await iterator.moveNext()) {
+      iterator.current.docs.forEach((element) {
+        counter++;
 
-      //print(question.data()['Question']);
-      QuestionWidget tmp = QuestionWidget(
-        doc: question,
-        initialNum: counter,
-        shouldShow: true,
-      );
+        QuestionWidget tmp = QuestionWidget(
+          doc: element,
+          initialNum: counter,
+          shouldShow: true,
+        );
 
-      evaluations.add(0);
+        evaluations.add(0);
 
-      tmp.evaluationEvent.subscribe((args) {
-        evaluations[tmp.initialNum - 1] = args.value;
+        tmp.evaluationEvent.subscribe((args) {
+          evaluations[tmp.initialNum - 1] = args.value;
+        });
+
+        theQuestions.add(tmp);
+        theWidgets.add(tmp);
       });
-
-      //This is the name of the module
-      //print(widget.doc.reference.parent.parent.id);
-      //widget.doc.reference.parent.parent
-
-      return tmp;
-    }).toList();
+    }
   }
 }
