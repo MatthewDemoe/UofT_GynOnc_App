@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'EvaluationTimer.dart';
+import 'package:bordered_text/bordered_text.dart';
 
 class CountdownTimer extends StatefulWidget {
   CountdownTimer({this.timerDuration, this.eTimer});
@@ -38,7 +39,7 @@ class _CountdownTimerState extends State<CountdownTimer>
 
     aController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: widget.timerDuration),
+      duration: Duration(minutes: widget.timerDuration),
     );
 
     aController.forward();
@@ -61,16 +62,55 @@ class _CountdownTimerState extends State<CountdownTimer>
         child: Container(),
         builder: (BuildContext context, Widget child) {
           return Container(
-            alignment: Alignment.center,
-            padding: EdgeInsets.all(10),
-            child: LinearProgressIndicator(
-              value: aController.value,
-            ),
-          );
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(10),
+              child: Stack(
+                  alignment: Alignment.center,
+                  overflow: Overflow.visible,
+                  children: [
+                    LinearProgressIndicator(
+                      minHeight: 10,
+                      value: aController.value,
+                    ),
+                    Positioned(
+                      left: (MediaQuery.of(context).size.width / 2) - 35,
+                      child: Container(
+                        constraints: BoxConstraints(minHeight: 25),
+                        height: 25,
+                        alignment: Alignment.center,
+                        child: BorderedText(
+                            strokeWidth: 3,
+                            strokeColor: Colors.black,
+                            child: Text(
+                              buildTimerText(),
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                              ),
+                            )),
+                      ),
+                    )
+                  ]));
         });
   }
 
   void startTimer() {
     aController.forward();
+  }
+
+  String buildTimerText() {
+    int timeLeft =
+        (widget.eTimer.getDuration() - widget.eTimer.getElapsedTime());
+
+    int minutesLeft = timeLeft ~/ 60;
+    int secondsLeft = timeLeft % 60;
+
+    String timeString;
+    if (minutesLeft < 1)
+      timeString = secondsLeft.toString();
+    else
+      timeString = minutesLeft.toString() + ' : ' + secondsLeft.toString();
+
+    return timeString;
   }
 }

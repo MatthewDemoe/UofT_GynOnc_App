@@ -247,3 +247,16 @@ void showSnackbar(BuildContext context, String message) {
         }),
   ));
 }
+
+String buildTimerText(int timeLeft) {
+  int minutesLeft = timeLeft ~/ 60;
+  int secondsLeft = timeLeft % 60;
+
+  String timeString;
+  if (minutesLeft < 1)
+    timeString = secondsLeft.toString();
+  else
+    timeString = minutesLeft.toString() + ' : ' + secondsLeft.toString();
+
+  return timeString;
+}

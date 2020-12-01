@@ -43,8 +43,8 @@ class _GeneralEvaluationPageState extends State<GeneralEvaluationPage> {
 
   double percent = 0;
 
-  CountdownTimer myTimer =
-      CountdownTimer(timerDuration: 15, eTimer: EvaluationTimer(duration: 15));
+  CountdownTimer myTimer = CountdownTimer(
+      timerDuration: 15, eTimer: EvaluationTimer(durationSeconds: 15));
 
   @override
   void initState() {

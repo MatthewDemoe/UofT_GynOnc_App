@@ -9,6 +9,7 @@ import 'QuestionWidget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 import 'EvaluationTimer.dart';
+import 'HelperFunctions.dart';
 
 class EvaluationPage extends StatefulWidget {
   EvaluationPage({Key key, this.title, this.doc}) : super(key: key);
@@ -46,25 +47,17 @@ class _EvaluationPageState extends State<EvaluationPage> {
 
   bool started = false;
 
-  //EvaluationTimer eTimer = EvaluationTimer(duration: 15);
-
-  CountdownTimer myTimer =
-      CountdownTimer(timerDuration: 15, eTimer: EvaluationTimer(duration: 15));
+  CountdownTimer myTimer;
+  int timerDuration;
 
   @override
   void initState() {
-    myTimer.subscribe(() {
-      evaluateQuestions();
-
-      showSnackbar(
-          context, 'Time has run out. Your answers have been submitted.');
-    });
-
     super.initState();
-
     //If we are in 'Evaluation' then two levels up is the module name
     //We'll use this to store user scores
     moduleID = widget.doc.reference.parent.parent.id;
+
+    initializeTimer();
 
     loadQuestions();
 
@@ -104,43 +97,7 @@ class _EvaluationPageState extends State<EvaluationPage> {
                     delegate: SliverChildListDelegate(
                         theWidgets + ((hideAnswers) ? [submitButton] : mark)))
               ])
-            : Container(
-                alignment: Alignment.center,
-                child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    Container(
-                      alignment: Alignment.center,
-                      padding: EdgeInsets.symmetric(vertical: 50),
-                      height: 150,
-                      decoration: BoxDecoration(
-                          image: DecorationImage(
-                        fit: BoxFit.fitHeight,
-                        image: AssetImage('assets/GynOnc_Logo.png'),
-                      )),
-                    ),
-                    Container(
-                        padding: EdgeInsets.all(50),
-                        height: 200,
-                        width: 200,
-                        child: RaisedButton(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                            color: getAppColor(),
-                            child: Text(
-                              'Start',
-                              style:
-                                  TextStyle(fontSize: 28, color: Colors.white),
-                            ),
-                            onPressed: () {
-                              myTimer.init();
-
-                              setState(() {
-                                started = true;
-                              });
-                            }))
-                  ],
-                )));
+            : buildStartPage());
   }
 
   void evaluateQuestions() {
@@ -200,6 +157,41 @@ class _EvaluationPageState extends State<EvaluationPage> {
             ]))));
   }
 
+  Future<bool> initializeTimer() async {
+    Stream<DocumentSnapshot> evalDoc =
+        FirebaseFirestore.instance.doc(widget.doc.reference.path).snapshots();
+
+    StreamIterator<DocumentSnapshot> iterator =
+        StreamIterator<DocumentSnapshot>(evalDoc);
+
+    if (await iterator.moveNext()) {
+      if (iterator.current.data().containsKey('Timer')) {
+        setState(() {
+          timerDuration = iterator.current.data()['Timer'];
+        });
+
+        createTimers(durationMinutes: timerDuration);
+        return true;
+      }
+    }
+
+    createTimers(durationMinutes: 0);
+    return false;
+  }
+
+  void createTimers({int durationMinutes}) {
+    myTimer = CountdownTimer(
+        timerDuration: durationMinutes,
+        eTimer: EvaluationTimer(durationSeconds: durationMinutes * 60));
+
+    myTimer.subscribe(() {
+      evaluateQuestions();
+
+      showSnackbar(
+          context, 'Time has run out. Your answers have been submitted.');
+    });
+  }
+
   Future<void> loadQuestions() async {
     Stream<QuerySnapshot> snap = FirebaseFirestore.instance
         .collection(widget.doc.reference.collection('Questions').path)
@@ -229,5 +221,77 @@ class _EvaluationPageState extends State<EvaluationPage> {
         theWidgets.add(tmp);
       });
     }
+  }
+
+  Widget buildStartPage() {
+    return FutureBuilder(
+        future: initializeTimer(),
+        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+          if (snapshot.hasData) {
+            return Container(
+                alignment: Alignment.center,
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    Container(
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.symmetric(vertical: 50),
+                      height: 150,
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                        fit: BoxFit.fitHeight,
+                        image: AssetImage('assets/GynOnc_Logo.png'),
+                      )),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(top: 50),
+                      alignment: Alignment.center,
+                      child: Text(
+                        moduleID + ' Evaluation',
+                        style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[800]),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(top: 25),
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Evaluation Time : ' +
+                            buildTimerText(timerDuration) +
+                            ' minutes.',
+                        style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[800]),
+                      ),
+                    ),
+                    Container(
+                        padding: EdgeInsets.all(50),
+                        height: 200,
+                        width: 200,
+                        child: RaisedButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                            color: getAppColor(),
+                            child: Text(
+                              'Start',
+                              style:
+                                  TextStyle(fontSize: 28, color: Colors.white),
+                            ),
+                            onPressed: () {
+                              myTimer.init();
+
+                              setState(() {
+                                started = true;
+                              });
+                            }))
+                  ],
+                ));
+          }
+
+          return LinearProgressIndicator();
+        });
   }
 }
