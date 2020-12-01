@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/rendering.dart';
 import 'package:uoft_gynonc_app/HelperFunctions.dart';
+import 'package:uoft_gynonc_app/SliverTimerHeader.dart';
 import 'dart:math';
 import 'QuestionWidget.dart';
+import 'EvaluationTimer.dart';
+import 'CountdownTimer.dart';
 
 class GeneralEvaluationPage extends StatefulWidget {
   GeneralEvaluationPage({Key key, this.title}) : super(key: key);
 
   final String title;
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   _GeneralEvaluationPageState createState() =>
@@ -39,11 +43,21 @@ class _GeneralEvaluationPageState extends State<GeneralEvaluationPage> {
 
   double percent = 0;
 
+  CountdownTimer myTimer =
+      CountdownTimer(timerDuration: 15, eTimer: EvaluationTimer(duration: 15));
+
   @override
   void initState() {
     super.initState();
 
     loadQuestions();
+
+    myTimer.subscribe(() {
+      evaluateQuestions();
+
+      /*showSnackbar(Scaffold.of(widget.scaffoldKey.currentContext).context,
+          'Time has run out. Your answers have been submitted.');*/
+    });
 
     mark = Container(
         alignment: Alignment.center,
@@ -72,6 +86,8 @@ class _GeneralEvaluationPageState extends State<GeneralEvaluationPage> {
 
           //Evaluate each answer when we click submit
           onPressed: () {
+            myTimer.init();
+
             Random rng = new Random();
             int idx = 0;
             for (int i = 0; i < numQuestions; i++) {
@@ -115,48 +131,8 @@ class _GeneralEvaluationPageState extends State<GeneralEvaluationPage> {
 
                     //Evaluate each answer when we click submit
                     onPressed: () {
-                      //Iterate through each question
-                      evaluations.forEach((element) {
-                        //Evaluate the submitter answer, will return 1 if correct, 0 if incorrect
-
-                        //Count the correct answers
-                        setState(() {
-                          correctAnswers += element;
-                        });
-                      });
-                      //Calculate the percentage of correct answers
-
-                      setState(() {
-                        submitted = true;
-                        percent = (correctAnswers.toDouble() /
-                            theQuestions.length.toDouble());
-                        //Clear widgets on the page(we just want to get rid of the submit button )
-                        theWidgets.clear();
-                        theWidgets = new List<Widget>();
-
-                        //Stop hiding correct answers
-                        hideAnswers = false;
-
-                        //Add the questions back
-                        theWidgets.addAll(theQuestions);
-
-                        mark = Container(
-                            alignment: Alignment.center,
-                            padding: EdgeInsets.only(
-                                left: 10, right: 10, top: 10, bottom: 50),
-                            child: Text(
-                              (percent * 100.0).round().toString() + '%',
-                              style: TextStyle(
-                                  fontSize: 48,
-                                  //Interpolate between green and red based on score
-                                  color: Color.lerp(
-                                      Colors.red, Colors.green, percent)),
-                            ));
-                      });
-
-                      updateMark(
-                          section: 'Overall',
-                          mark: (percent * 100.0).round().toString() + '%');
+                      myTimer.cancel();
+                      evaluateQuestions();
                     },
                   )));
             });
@@ -167,20 +143,19 @@ class _GeneralEvaluationPageState extends State<GeneralEvaluationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: widget.scaffoldKey,
         appBar: AppBar(
           title: Text(widget.title),
         ),
         //Get the list of questions from firebase
         body: started
-            ? CustomScrollView(
-                shrinkWrap: true,
-                anchor: 0.5,
-                physics: BouncingScrollPhysics(),
-                slivers: [
-                    SliverList(
-                        delegate: SliverChildListDelegate(
-                            (submitted ? theWidgets + [mark] : theWidgets)))
-                  ])
+            ? CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
+                SliverPersistentHeader(
+                    pinned: true, delegate: SliverTimerHeader(myTimer)),
+                SliverList(
+                    delegate: SliverChildListDelegate(
+                        (submitted ? theWidgets + [mark] : theWidgets)))
+              ])
             : Container(
                 alignment: Alignment.center,
                 child: ListView(
@@ -224,5 +199,48 @@ class _GeneralEvaluationPageState extends State<GeneralEvaluationPage> {
         });
       });
     });
+  }
+
+  void evaluateQuestions() {
+    myTimer.cancel();
+
+    //Iterate through each question
+    evaluations.forEach((element) {
+      //Evaluate the submitter answer, will return 1 if correct, 0 if incorrect
+
+      //Count the correct answers
+      setState(() {
+        correctAnswers += element;
+      });
+    });
+    //Calculate the percentage of correct answers
+
+    setState(() {
+      submitted = true;
+      percent = (correctAnswers.toDouble() / theQuestions.length.toDouble());
+      //Clear widgets on the page(we just want to get rid of the submit button )
+      theWidgets.clear();
+      theWidgets = new List<Widget>();
+
+      //Stop hiding correct answers
+      hideAnswers = false;
+
+      //Add the questions back
+      theWidgets.addAll(theQuestions);
+
+      mark = Container(
+          alignment: Alignment.center,
+          padding: EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 50),
+          child: Text(
+            (percent * 100.0).round().toString() + '%',
+            style: TextStyle(
+                fontSize: 48,
+                //Interpolate between green and red based on score
+                color: Color.lerp(Colors.red, Colors.green, percent)),
+          ));
+    });
+
+    updateMark(
+        section: 'Overall', mark: (percent * 100.0).round().toString() + '%');
   }
 }

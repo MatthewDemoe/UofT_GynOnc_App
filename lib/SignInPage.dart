@@ -546,7 +546,7 @@ class _SignInPageState extends State<SignInPage> {
         .collection('Evaluations')
         .doc('Marks')
         .collection('Modules')
-        .doc('Overall Evaluation')
+        .doc('Overall')
         .set({'Attempts': 0});
 
     FirebaseFirestore.instance

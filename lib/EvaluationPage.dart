@@ -2,11 +2,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/rendering.dart';
+import 'package:uoft_gynonc_app/CountdownTimer.dart';
 import 'package:uoft_gynonc_app/HelperFunctions.dart';
+import 'package:uoft_gynonc_app/SliverTimerHeader.dart';
 import 'QuestionWidget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
-import 'EvaluationFAB.dart';
+import 'EvaluationTimer.dart';
 
 class EvaluationPage extends StatefulWidget {
   EvaluationPage({Key key, this.title, this.doc}) : super(key: key);
@@ -44,8 +46,20 @@ class _EvaluationPageState extends State<EvaluationPage> {
 
   bool started = false;
 
+  //EvaluationTimer eTimer = EvaluationTimer(duration: 15);
+
+  CountdownTimer myTimer =
+      CountdownTimer(timerDuration: 15, eTimer: EvaluationTimer(duration: 15));
+
   @override
   void initState() {
+    myTimer.subscribe(() {
+      evaluateQuestions();
+
+      showSnackbar(
+          context, 'Time has run out. Your answers have been submitted.');
+    });
+
     super.initState();
 
     //If we are in 'Evaluation' then two levels up is the module name
@@ -65,71 +79,15 @@ class _EvaluationPageState extends State<EvaluationPage> {
           color: getAppColor(),
           child: Text(
             'Submit',
-            style: TextStyle(fontSize: 28),
+            style: TextStyle(fontSize: 28, color: Colors.white),
           ),
 
           //Evaluate each answer when we click submit
           onPressed: () {
+            myTimer.cancel();
+
             //initialize the amount of correct answers
-            theQuestions.forEach((element) {
-              element.showAnswers();
-            });
-            //Iterate through each question
-            evaluations.forEach((element) {
-              //Count the correct answers
-              correctAnswers += element;
-            });
-            //Calculate the percentage of correct answers
-
-            setState(() {
-              percent =
-                  (correctAnswers.toDouble() / theQuestions.length.toDouble());
-
-              //Stop hiding correct answers
-              hideAnswers = false;
-            });
-            mark.add(new Container(
-                alignment: Alignment.center,
-                padding:
-                    EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
-                child: Text(
-                  (percent * 100.0).round().toString() + '%',
-                  style: TextStyle(
-                      fontSize: 48,
-                      //Interpolate between green and red based on score
-                      color: Color.lerp(Colors.red, Colors.green, percent)),
-                )));
-
-            updateMark(
-                section: moduleID,
-                mark: (percent * 100.0).round().toString() + '%');
-
-            mark.add(Container(
-                padding: EdgeInsets.only(bottom: 25),
-                child: RichText(
-                    textAlign: TextAlign.center,
-                    text: new TextSpan(children: [
-                      TextSpan(
-                          text: 'Click ',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: getDefaultFontSize())),
-                      TextSpan(
-                          text: 'here',
-                          style: TextStyle(
-                              color: Colors.blue,
-                              decoration: TextDecoration.underline,
-                              fontSize: getDefaultFontSize()),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              launch(widget.doc.data()['Link']);
-                            }),
-                      TextSpan(
-                          text: ' for further reading.',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: getDefaultFontSize())),
-                    ]))));
+            evaluateQuestions();
           },
         ));
   }
@@ -138,9 +96,10 @@ class _EvaluationPageState extends State<EvaluationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         key: widget.scaffoldKey,
-        floatingActionButton: EvaluationFAB(),
         body: started
             ? CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
+                SliverPersistentHeader(
+                    pinned: true, delegate: SliverTimerHeader(myTimer)),
                 SliverList(
                     delegate: SliverChildListDelegate(
                         theWidgets + ((hideAnswers) ? [submitButton] : mark)))
@@ -174,12 +133,71 @@ class _EvaluationPageState extends State<EvaluationPage> {
                                   TextStyle(fontSize: 28, color: Colors.white),
                             ),
                             onPressed: () {
+                              myTimer.init();
+
                               setState(() {
                                 started = true;
                               });
                             }))
                   ],
-                ))); //
+                )));
+  }
+
+  void evaluateQuestions() {
+    theQuestions.forEach((element) {
+      element.showAnswers();
+    });
+    //Iterate through each question
+    evaluations.forEach((element) {
+      //Count the correct answers
+      correctAnswers += element;
+    });
+    //Calculate the percentage of correct answers
+
+    setState(() {
+      percent = (correctAnswers.toDouble() / theQuestions.length.toDouble());
+
+      //Stop hiding correct answers
+      hideAnswers = false;
+    });
+    mark.add(new Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
+        child: Text(
+          (percent * 100.0).round().toString() + '%',
+          style: TextStyle(
+              fontSize: 48,
+              //Interpolate between green and red based on score
+              color: Color.lerp(Colors.red, Colors.green, percent)),
+        )));
+
+    updateMark(
+        section: moduleID, mark: (percent * 100.0).round().toString() + '%');
+
+    mark.add(Container(
+        padding: EdgeInsets.only(bottom: 25),
+        child: RichText(
+            textAlign: TextAlign.center,
+            text: new TextSpan(children: [
+              TextSpan(
+                  text: 'Click ',
+                  style: TextStyle(
+                      color: Colors.black, fontSize: getDefaultFontSize())),
+              TextSpan(
+                  text: 'here',
+                  style: TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                      fontSize: getDefaultFontSize()),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      launch(widget.doc.data()['Link']);
+                    }),
+              TextSpan(
+                  text: ' for further reading.',
+                  style: TextStyle(
+                      color: Colors.black, fontSize: getDefaultFontSize())),
+            ]))));
   }
 
   Future<void> loadQuestions() async {

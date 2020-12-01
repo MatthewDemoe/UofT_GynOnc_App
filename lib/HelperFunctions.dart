@@ -89,17 +89,11 @@ Future<void> updateMark({String section, String mark}) async {
       .doc(section)
       .snapshots();
 
-  print('AFTER SNAPSHOT ');
-
   StreamIterator<DocumentSnapshot> iterator =
       StreamIterator<DocumentSnapshot>(snap);
 
   if (await iterator.moveNext()) {
-    print(iterator.current.data()['Attempts']);
-
     attempts = (iterator.current.data()['Attempts'] as int) + 1;
-
-    print('ATTEMPTS: ' + attempts.toString());
 
     FirebaseFirestore.instance
         .collection('Users')
@@ -240,7 +234,11 @@ void showErrorSnackbar(BuildContext context, String message) {
 void showSnackbar(BuildContext context, String message) {
   Scaffold.of(context).showSnackBar(SnackBar(
     content: Row(children: [
-      Text(message),
+      Flexible(
+          child: Text(
+        message,
+        textAlign: TextAlign.center,
+      )),
     ]),
     action: SnackBarAction(
         label: 'Okay',
