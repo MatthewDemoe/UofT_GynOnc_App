@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'CountdownTimer.dart';
+import 'VisualTimer.dart';
 
 class SliverTimerHeader extends SliverPersistentHeaderDelegate {
-  SliverTimerHeader(CountdownTimer timer) {
+  SliverTimerHeader(VisualTimer timer) {
     _timer = timer;
   }
 
-  CountdownTimer _timer;
+  VisualTimer _timer;
 
   @override
   Widget build(

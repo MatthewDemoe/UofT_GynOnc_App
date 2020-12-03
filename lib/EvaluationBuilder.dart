@@ -1,34 +1,36 @@
+import 'dart:async';
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/rendering.dart';
 import 'package:uoft_gynonc_app/CallbackTimer.dart';
-import 'package:uoft_gynonc_app/HelperFunctions.dart';
+import 'package:uoft_gynonc_app/QuestionWidget.dart';
 import 'package:uoft_gynonc_app/SliverTimerHeader.dart';
 import 'package:uoft_gynonc_app/VisualTimer.dart';
-import 'QuestionWidget.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:async';
-import 'VisualTimer.dart';
 import 'HelperFunctions.dart';
 
-class EvaluationPage extends StatefulWidget {
-  EvaluationPage({Key key, this.title, this.doc}) : super(key: key);
-
-  final String title;
-  //The evaluation document in firebase
-  final QueryDocumentSnapshot doc;
+class EvaluationBuilder extends StatefulWidget {
+  EvaluationBuilder({Key key, this.title, this.doc}) : super(key: key);
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
+  final QueryDocumentSnapshot doc;
+  final String title;
+
   @override
-  _EvaluationPageState createState() => new _EvaluationPageState();
+  _EvaluationBuilderState createState() => _EvaluationBuilderState();
 }
 
-class _EvaluationPageState extends State<EvaluationPage> {
+class _EvaluationBuilderState extends State<EvaluationBuilder> {
   int currentQuestion = 0;
+  int numQuestions = 5;
+
   //The list of question widgets in the evaluation
   List<QuestionWidget> theQuestions = new List<QuestionWidget>();
+  List<QuestionWidget> allQuestions = new List<QuestionWidget>();
+
   //All widgets we will display, contains question widgets as well as other types of widgets
   List<Widget> theWidgets = new List<Widget>();
   //After the users submit their answers, we will show which are correct/incorrect
@@ -51,42 +53,25 @@ class _EvaluationPageState extends State<EvaluationPage> {
 
   @override
   void initState() {
+    if (widget.doc != null) {
+      print(widget.doc.id);
+    } else {
+      print('Overall Evaluation');
+    }
+
+    initEvaluation();
+
     super.initState();
-    //If we are in 'Evaluation' then two levels up is the module name
-    //We'll use this to store user scores
-    moduleID = widget.doc.reference.parent.parent.id;
-
-    initializeTimer();
-
-    loadQuestions();
-
-    submitButton = Container(
-        padding: EdgeInsets.all(10),
-        height: 100,
-        width: 200,
-        child: RaisedButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          color: getAppColor(),
-          child: Text(
-            'Submit',
-            style: TextStyle(fontSize: 28, color: Colors.white),
-          ),
-
-          //Evaluate each answer when we click submit
-          onPressed: () {
-            myTimer.cancel();
-
-            //initialize the amount of correct answers
-            evaluateQuestions();
-          },
-        ));
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.title,
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
         key: widget.scaffoldKey,
         body: started
             ? CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
@@ -113,9 +98,12 @@ class _EvaluationPageState extends State<EvaluationPage> {
     setState(() {
       percent = (correctAnswers.toDouble() / theQuestions.length.toDouble());
 
+      //if (widget.doc != null) {
       //Stop hiding correct answers
       hideAnswers = false;
+      //}
     });
+
     mark.add(new Container(
         alignment: Alignment.center,
         padding: EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
@@ -130,35 +118,38 @@ class _EvaluationPageState extends State<EvaluationPage> {
     updateMark(
         section: moduleID, mark: (percent * 100.0).round().toString() + '%');
 
-    mark.add(Container(
-        padding: EdgeInsets.only(bottom: 25),
-        child: RichText(
-            textAlign: TextAlign.center,
-            text: new TextSpan(children: [
-              TextSpan(
-                  text: 'Click ',
-                  style: TextStyle(
-                      color: Colors.black, fontSize: getDefaultFontSize())),
-              TextSpan(
-                  text: 'here',
-                  style: TextStyle(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                      fontSize: getDefaultFontSize()),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      launch(widget.doc.data()['Link']);
-                    }),
-              TextSpan(
-                  text: ' for further reading.',
-                  style: TextStyle(
-                      color: Colors.black, fontSize: getDefaultFontSize())),
-            ]))));
+    if (widget.doc != null) {
+      mark.add(Container(
+          padding: EdgeInsets.only(bottom: 25),
+          child: RichText(
+              textAlign: TextAlign.center,
+              text: new TextSpan(children: [
+                TextSpan(
+                    text: 'Click ',
+                    style: TextStyle(
+                        color: Colors.black, fontSize: getDefaultFontSize())),
+                TextSpan(
+                    text: 'here',
+                    style: TextStyle(
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                        fontSize: getDefaultFontSize()),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        launch(widget.doc.data()['Link']);
+                      }),
+                TextSpan(
+                    text: ' for further reading.',
+                    style: TextStyle(
+                        color: Colors.black, fontSize: getDefaultFontSize())),
+              ]))));
+    }
   }
 
   Future<bool> initializeTimer() async {
-    Stream<DocumentSnapshot> evalDoc =
-        FirebaseFirestore.instance.doc(widget.doc.reference.path).snapshots();
+    Stream<DocumentSnapshot> evalDoc = (widget.doc == null)
+        ? FirebaseFirestore.instance.doc('Question Bank/Questions').snapshots()
+        : FirebaseFirestore.instance.doc(widget.doc.reference.path).snapshots();
 
     StreamIterator<DocumentSnapshot> iterator =
         StreamIterator<DocumentSnapshot>(evalDoc);
@@ -222,6 +213,73 @@ class _EvaluationPageState extends State<EvaluationPage> {
     }
   }
 
+  Future<void> loadQuestionsGeneral() async {
+    DocumentReference doc =
+        FirebaseFirestore.instance.collection('Question Bank').doc('Questions');
+
+    int counter = 0;
+    doc.snapshots().forEach((element) {
+      numQuestions = element.data()['Num Questions'];
+      element.data().forEach((key, value) {
+        if (value.runtimeType != int) {
+          CollectionReference tmpCol =
+              FirebaseFirestore.instance.collection(value);
+          print(tmpCol);
+          tmpCol.snapshots().forEach((quiz) {
+            quiz.docs.forEach((e) {
+              counter++;
+              //print('ADDED QUESTION');
+              allQuestions.add(QuestionWidget(
+                doc: e,
+                initialNum: counter,
+                shouldShow: false,
+              ));
+            });
+          });
+        }
+      });
+    });
+  }
+
+  Future<void> initEvaluation() async {
+    //If we are in 'Evaluation' then two levels up is the module name
+    //We'll use this to store user scores
+    moduleID = (widget.doc == null)
+        ? 'Overall'
+        : widget.doc.reference.parent.parent.id;
+
+    initializeTimer().whenComplete(() {
+      if (widget.doc == null) {
+        loadQuestionsGeneral();
+      } else {
+        loadQuestions();
+      }
+
+      submitButton = Container(
+          padding: EdgeInsets.all(10),
+          height: 100,
+          width: 200,
+          child: RaisedButton(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            color: getAppColor(),
+            child: Text(
+              'Submit',
+              style: TextStyle(fontSize: 28, color: Colors.white),
+            ),
+
+            //Evaluate each answer when we click submit
+            onPressed: () {
+              myTimer.cancel();
+
+              //initialize the amount of correct answers
+              evaluateQuestions();
+            },
+          ));
+    });
+  }
+
   Widget buildStartPage() {
     return FutureBuilder(
         future: initializeTimer(),
@@ -282,6 +340,11 @@ class _EvaluationPageState extends State<EvaluationPage> {
                             onPressed: () {
                               myTimer.init();
 
+                              if (widget.doc == null) {
+                                chooseQuestions();
+                                //initializeQuiz();
+                              }
+
                               setState(() {
                                 started = true;
                               });
@@ -292,5 +355,39 @@ class _EvaluationPageState extends State<EvaluationPage> {
 
           return LinearProgressIndicator();
         });
+  }
+
+  void chooseQuestions() {
+    Random rng = new Random();
+    int idx = 0;
+
+    for (int i = 0; i < numQuestions; i++) {
+      idx = rng.nextInt(allQuestions.length - 1);
+      evaluations.add(0);
+
+      //allQuestions[idx]
+      QuestionWidget q = allQuestions[idx];
+
+      QuestionWidget tmp = new QuestionWidget(
+        doc: q.doc,
+        shouldShow: q.shouldShow,
+        initialNum: i + 1,
+      );
+
+      tmp.evaluationEvent.subscribe((args) {
+        evaluations[tmp.initialNum - 1] = args.value;
+      });
+
+      theQuestions.add(tmp);
+      allQuestions.removeAt(idx);
+    }
+
+    theWidgets.addAll(theQuestions);
+  }
+
+  void initializeQuiz() {
+    setState(() {
+      started = true;
+    });
   }
 }

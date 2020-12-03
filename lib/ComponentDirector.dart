@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:uoft_gynonc_app/EvaluationBuilder.dart';
 import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'VideoPage.dart';
 import 'EvaluationPage.dart';
@@ -135,7 +136,7 @@ class _ComponentDirectorState extends State<ComponentDirector> {
 
       //If this document has 'evaluation' in the name, create an ecaluation page from its contents
       if (doc.id.contains('Evaluation')) {
-        return new EvaluationPage(
+        return new EvaluationBuilder(
             key: widget.key, title: 'Evaluation', doc: doc);
       }
     }).toList();

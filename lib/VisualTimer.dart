@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'EvaluationTimer.dart';
+import 'CallbackTimer.dart';
 import 'package:bordered_text/bordered_text.dart';
 
-class CountdownTimer extends StatefulWidget {
-  CountdownTimer({this.timerDuration, this.eTimer});
+class VisualTimer extends StatefulWidget {
+  VisualTimer({this.timerDuration, this.eTimer});
 
   final int timerDuration;
 
-  final EvaluationTimer eTimer;
+  final CallbackTimer eTimer;
 
   void subscribe(void Function() callback) {
     eTimer.subscribe(callback);
@@ -26,10 +26,10 @@ class CountdownTimer extends StatefulWidget {
   }
 
   @override
-  _CountdownTimerState createState() => _CountdownTimerState();
+  _VisualTimerState createState() => _VisualTimerState();
 }
 
-class _CountdownTimerState extends State<CountdownTimer>
+class _VisualTimerState extends State<VisualTimer>
     with TickerProviderStateMixin {
   AnimationController aController;
 

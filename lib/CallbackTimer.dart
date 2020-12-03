@@ -1,8 +1,8 @@
 import 'package:event/event.dart';
 import 'dart:async';
 
-class EvaluationTimer {
-  EvaluationTimer({int durationSeconds}) {
+class CallbackTimer {
+  CallbackTimer({int durationSeconds}) {
     _timerDuration = durationSeconds;
   }
 

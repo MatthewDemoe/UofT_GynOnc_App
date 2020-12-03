@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:uoft_gynonc_app/AccountPage.dart';
+import 'package:uoft_gynonc_app/EvaluationBuilder.dart';
 import 'package:uoft_gynonc_app/GeneralEvaluationPage.dart';
 import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'CategoryModules.dart';
@@ -128,7 +129,8 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => GeneralEvaluationPage(
+                          builder: (context) => EvaluationBuilder(
+                                key: widget.key,
                                 title: 'General Evaluation',
                               )));
                 },
