@@ -50,15 +50,10 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
 
   VisualTimer myTimer;
   int timerDuration;
+  BuildContext scaffoldContext;
 
   @override
   void initState() {
-    if (widget.doc != null) {
-      print(widget.doc.id);
-    } else {
-      print('Overall Evaluation');
-    }
-
     initEvaluation();
 
     super.initState();
@@ -66,22 +61,31 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            widget.title,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
+        appBar: widget.doc == null
+            ? AppBar(
+                title: Text(
+                  widget.title,
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            : null,
         key: widget.scaffoldKey,
-        body: started
-            ? CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
-                SliverPersistentHeader(
-                    pinned: true, delegate: SliverTimerHeader(myTimer)),
-                SliverList(
-                    delegate: SliverChildListDelegate(
-                        theWidgets + ((hideAnswers) ? [submitButton] : mark)))
-              ])
-            : buildStartPage());
+        body: Builder(builder: (context) {
+          if (started)
+            myTimer.subscribe(() {
+              showSnackbar(context,
+                  'Time has run out. Your answers have been submitted.');
+            });
+          return started
+              ? CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
+                  SliverPersistentHeader(
+                      pinned: true, delegate: SliverTimerHeader(myTimer)),
+                  SliverList(
+                      delegate: SliverChildListDelegate(
+                          theWidgets + ((hideAnswers) ? [submitButton] : mark)))
+                ])
+              : buildStartPage();
+        }));
   }
 
   void evaluateQuestions() {
@@ -98,10 +102,8 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
     setState(() {
       percent = (correctAnswers.toDouble() / theQuestions.length.toDouble());
 
-      //if (widget.doc != null) {
       //Stop hiding correct answers
       hideAnswers = false;
-      //}
     });
 
     mark.add(new Container(
@@ -176,9 +178,6 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
 
     myTimer.subscribe(() {
       evaluateQuestions();
-
-      showSnackbar(
-          context, 'Time has run out. Your answers have been submitted.');
     });
   }
 
@@ -224,11 +223,10 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
         if (value.runtimeType != int) {
           CollectionReference tmpCol =
               FirebaseFirestore.instance.collection(value);
-          print(tmpCol);
           tmpCol.snapshots().forEach((quiz) {
             quiz.docs.forEach((e) {
               counter++;
-              //print('ADDED QUESTION');
+
               allQuestions.add(QuestionWidget(
                 doc: e,
                 initialNum: counter,
@@ -284,6 +282,7 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
     return FutureBuilder(
         future: initializeTimer(),
         builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+          //print(snapshot.connectionState);
           if (snapshot.hasData) {
             return Container(
                 alignment: Alignment.center,
@@ -338,11 +337,10 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
                                   TextStyle(fontSize: 28, color: Colors.white),
                             ),
                             onPressed: () {
-                              myTimer.init();
+                              //myTimer.init();
 
                               if (widget.doc == null) {
                                 chooseQuestions();
-                                //initializeQuiz();
                               }
 
                               setState(() {

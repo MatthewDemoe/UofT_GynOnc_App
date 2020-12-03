@@ -227,7 +227,7 @@ class _GeneralEvaluationPageState extends State<GeneralEvaluationPage> {
 
           //Evaluate each answer when we click submit
           onPressed: () {
-            myTimer.init();
+            //myTimer.init();
 
             Random rng = new Random();
             int idx = 0;

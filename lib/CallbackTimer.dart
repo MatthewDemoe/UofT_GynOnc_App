@@ -20,7 +20,6 @@ class CallbackTimer {
     _elapsedTime += 1;
 
     if (_elapsedTime >= _timerDuration) {
-      print('BROADCASTING EVENT');
       _callbackEvent.broadcast();
 
       _timer.cancel();

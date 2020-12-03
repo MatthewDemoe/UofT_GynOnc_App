@@ -280,7 +280,7 @@ class _EvaluationPageState extends State<EvaluationPage> {
                                   TextStyle(fontSize: 28, color: Colors.white),
                             ),
                             onPressed: () {
-                              myTimer.init();
+                              //myTimer.init();
 
                               setState(() {
                                 started = true;

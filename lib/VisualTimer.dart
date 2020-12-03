@@ -17,9 +17,9 @@ class VisualTimer extends StatefulWidget {
     eTimer.subscribe(callback);
   }
 
-  void init() {
+  /*void init() {
     eTimer.init();
-  }
+  }*/
 
   void cancel() {
     eTimer.cancel();
@@ -43,6 +43,7 @@ class _VisualTimerState extends State<VisualTimer>
     );
 
     aController.forward();
+    widget.eTimer.init();
 
     widget.eTimer.subscribeCancelEvent(() {
       aController.stop();
@@ -51,7 +52,8 @@ class _VisualTimerState extends State<VisualTimer>
 
   @override
   dispose() {
-    aController.dispose();
+    //aController.dispose();
+    widget.eTimer.cancel();
     super.dispose();
   }
 
