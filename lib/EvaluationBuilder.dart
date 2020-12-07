@@ -166,7 +166,6 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
         return true;
       }
     }
-
     createTimers(durationMinutes: 0);
     return false;
   }
@@ -314,9 +313,11 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
                       padding: EdgeInsets.only(top: 25),
                       alignment: Alignment.center,
                       child: Text(
-                        'Evaluation Time : ' +
-                            buildTimerText(timerDuration) +
-                            ' minutes.',
+                        (timerDuration > 0)
+                            ? 'Evaluation Time : ' +
+                                buildTimerText(timerDuration) +
+                                ((timerDuration == 1) ? ' minute.' : 'minutes.')
+                            : 'Evaluation Time : Unlimited',
                         style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -337,8 +338,6 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
                                   TextStyle(fontSize: 28, color: Colors.white),
                             ),
                             onPressed: () {
-                              //myTimer.init();
-
                               if (widget.doc == null) {
                                 chooseQuestions();
                               }

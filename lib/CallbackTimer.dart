@@ -13,7 +13,9 @@ class CallbackTimer {
   final _cancelEvent = new Event();
 
   void init() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) => updateTimer());
+    //if (_timerDuration > 0)
+    _timer = Timer.periodic(Duration(seconds: 1),
+        (timer) => (_timerDuration > 0) ? updateTimer() : null);
   }
 
   void updateTimer() {
