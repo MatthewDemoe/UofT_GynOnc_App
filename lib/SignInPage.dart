@@ -16,27 +16,38 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
+  //Strings containing user input
   String emailAddress = '';
   String password = '';
   String confirmPassword = '';
   String firstName = '';
   String lastName = '';
 
+  //Whether or not to hide the input password
   bool obscurePassword = true;
+
+  //Is the user signing in or creating an account - display different widgets
   bool signIn = true;
+
+  //Change display if the user forgot their password
   bool forgotPassword = false;
+
+  //The current user
   User theUser;
 
+  //Has the user made any input mistakes
   bool usernameMistake = false;
   bool passwordMistake = false;
   bool nameMistake = false;
 
+  //Test Size
   double messageSize = 14.0;
 
   @override
   void initState() {
     super.initState();
 
+    //We go to this page initially, if the user is signed in, go to the home page instead
     FirebaseAuth.instance.authStateChanges().listen((User user) {
       if (user == null) {
         print('User is currently signed out!');
@@ -85,10 +96,14 @@ class _SignInPageState extends State<SignInPage> {
                                         AssetImage('assets/GynOnc_Logo.png'))),
                           )
                         ] +
+                        //If the user is not on the forgot password page
                         (!forgotPassword
+                            //If the user is on the sign in page, build the sign in page
                             ? (signIn
                                 ? buildSignIn(context)
+                                //They are not on the sign in or forgot password page, so go to create account page
                                 : buildCreateAccount(context))
+                            //They are on the reset password page, build it
                             : buildReset(context))))));
   }
 
@@ -103,31 +118,44 @@ class _SignInPageState extends State<SignInPage> {
         padding: EdgeInsets.all(10),
         alignment: Alignment.center,
       ),
+      /////////////////////////////////EMAIL////////////////////////////////////
       Container(
         alignment: Alignment.center,
         padding: EdgeInsets.all(10),
         child: TextFormField(
+          //We need to add the key to the object so that the list knows they are unique objects
+          //Otherwise the input would not be cleared when we went to a different "screen"
+          key: ObjectKey('Email Input'),
+          initialValue: '',
           decoration: InputDecoration(
               labelStyle:
                   TextStyle(color: usernameMistake ? Colors.red : Colors.black),
               labelText: usernameMistake ? 'Email Address *' : 'Email Address'),
+          //Set string when the user inputs anything
+          onChanged: (inEmail) {
+            setState(() {
+              emailAddress = inEmail;
+            });
+          },
           onFieldSubmitted: (inEmail) {
             setState(() {
               emailAddress = inEmail;
             });
-            print(emailAddress);
           },
         ),
       ),
+      ////////////////PASSWORD////////////////////////
       Container(
         alignment: Alignment.center,
         padding: EdgeInsets.all(10),
         child: TextFormField(
+          key: ObjectKey('Password Input'),
           obscureText: obscurePassword,
           decoration: InputDecoration(
               labelStyle:
                   TextStyle(color: passwordMistake ? Colors.red : Colors.black),
               suffixIcon: IconButton(
+                //button to toggle whether to hide the password
                 icon: Icon(Icons.visibility),
                 onPressed: () {
                   setState(() {
@@ -136,14 +164,20 @@ class _SignInPageState extends State<SignInPage> {
                 },
               ),
               labelText: passwordMistake ? 'Password *' : 'Password'),
+          //Set string when the user inputs anything
+          onChanged: (inPassword) {
+            setState(() {
+              password = inPassword;
+            });
+          },
           onFieldSubmitted: (inPassword) {
             setState(() {
               password = inPassword;
             });
-            print(password);
           },
         ),
       ),
+      //////////////////////////////////BOTTOM TEXT/////////////////////////////////
       Container(
         padding: EdgeInsets.all(10),
         alignment: Alignment.center,
@@ -152,6 +186,7 @@ class _SignInPageState extends State<SignInPage> {
             TextSpan(
                 text: 'Don\'t have an account? ',
                 style: TextStyle(color: Colors.black, fontSize: messageSize)),
+            //Sends us to create account page
             TextSpan(
                 text: 'Create one.',
                 style: TextStyle(
@@ -162,12 +197,19 @@ class _SignInPageState extends State<SignInPage> {
                   ..onTap = () {
                     setState(() {
                       signIn = false;
+                      usernameMistake = false;
+                      passwordMistake = false;
+                      password = '';
+                      emailAddress = '';
+                      lastName = '';
+                      firstName = '';
                     });
                     print(emailAddress);
                   }),
           ]),
         ),
       ),
+      //Sends us to forgot password page
       Container(
         padding: EdgeInsets.all(10),
         alignment: Alignment.center,
@@ -192,6 +234,7 @@ class _SignInPageState extends State<SignInPage> {
           ]),
         ),
       ),
+      //////////////////CONFIRM BUTTON///////////////////////////////
       Container(
           alignment: Alignment.center,
           width: 100,
@@ -202,6 +245,7 @@ class _SignInPageState extends State<SignInPage> {
               style: TextStyle(fontSize: 14, color: Colors.white),
             ),
             color: getAppColor(),
+            //Try to sign in, send appropriate error messages
             onPressed: () async {
               try {
                 UserCredential userCredential = await FirebaseAuth.instance
@@ -237,6 +281,7 @@ class _SignInPageState extends State<SignInPage> {
     ];
   }
 
+  ////////////////////////////////ACCOUNT CREATION PAGE////////////////////////////////////
   List<Widget> buildCreateAccount(BuildContext context) {
     return <Widget>[
       Container(
@@ -252,10 +297,21 @@ class _SignInPageState extends State<SignInPage> {
         alignment: Alignment.center,
         padding: EdgeInsets.all(10),
         child: TextFormField(
+          //We need to add the key to the object so that the list knows they are unique objects
+          //Otherwise the input would not be cleared when we went to a different "screen"
+          key: ObjectKey('First Name Input'),
+          initialValue: '',
+          //Change colour etc. when there is an error
           decoration: InputDecoration(
               labelStyle:
                   TextStyle(color: nameMistake ? Colors.red : Colors.black),
               labelText: nameMistake ? 'First Name *' : 'First Name'),
+          //update stored name whenever user inputs
+          onChanged: (inName) {
+            setState(() {
+              firstName = inName;
+            });
+          },
           onFieldSubmitted: (inName) {
             setState(() {
               firstName = inName;
@@ -263,14 +319,23 @@ class _SignInPageState extends State<SignInPage> {
           },
         ),
       ),
+      /////////////////////////LAST NAME////////////////////////////////////////
       Container(
         alignment: Alignment.center,
         padding: EdgeInsets.all(10),
         child: TextFormField(
+          key: ObjectKey('Last Name Input'),
           decoration: InputDecoration(
+              //Change style if there's an error
               labelStyle:
                   TextStyle(color: nameMistake ? Colors.red : Colors.black),
               labelText: nameMistake ? 'Last Name *' : 'Last Name'),
+          //Save input
+          onChanged: (inName) {
+            setState(() {
+              lastName = inName;
+            });
+          },
           onFieldSubmitted: (inName) {
             setState(() {
               lastName = inName;
@@ -278,31 +343,44 @@ class _SignInPageState extends State<SignInPage> {
           },
         ),
       ),
+      ////////////////////////////EMAIL///////////////////////////////
       Container(
         alignment: Alignment.center,
         padding: EdgeInsets.all(10),
         child: TextFormField(
+          key: ObjectKey('Email Input'),
           decoration: InputDecoration(
+              //Change style if there's an error
               labelStyle:
                   TextStyle(color: usernameMistake ? Colors.red : Colors.black),
               labelText: usernameMistake ? 'Email Address *' : 'Email Address'),
-          onFieldSubmitted: (inEmail) {
-            usernameMistake = false;
-
+          //Save input
+          onChanged: (inEmail) {
             setState(() {
+              emailAddress = inEmail;
+            });
+          },
+          onFieldSubmitted: (inEmail) {
+            setState(() {
+              usernameMistake = false;
+
               emailAddress = inEmail;
             });
           },
         ),
       ),
+      ////////////////////////////////Password///////////////////////////////////
       Container(
         alignment: Alignment.center,
         padding: EdgeInsets.all(10),
         child: TextFormField(
+          key: ObjectKey('Password Input'),
           obscureText: obscurePassword,
           decoration: InputDecoration(
+              //Change style if there's an error
               labelStyle:
                   TextStyle(color: passwordMistake ? Colors.red : Colors.black),
+              //Toggle password visibility
               suffixIcon: IconButton(
                 icon: Icon(Icons.visibility),
                 onPressed: () {
@@ -311,23 +389,34 @@ class _SignInPageState extends State<SignInPage> {
                   });
                 },
               ),
+              //Change style if there's an error
+
               labelText: passwordMistake ? 'Password *' : 'Password'),
+          //Save input
+          onChanged: (inPassword) {
+            setState(() {
+              password = inPassword;
+            });
+          },
           onFieldSubmitted: (inPassword) {
             setState(() {
               password = inPassword;
             });
-            print(password);
           },
         ),
       ),
+      /////////////////////////////CONFIRM PASSWORD//////////////////////////////////////
       Container(
         alignment: Alignment.center,
         padding: EdgeInsets.all(10),
         child: TextFormField(
+          key: ObjectKey('Confirm Password Input'),
           obscureText: obscurePassword,
           decoration: InputDecoration(
+              //Change style if there's a mistake
               labelStyle:
                   TextStyle(color: passwordMistake ? Colors.red : Colors.black),
+              //toggle password visibility
               suffixIcon: IconButton(
                 icon: Icon(Icons.visibility),
                 onPressed: () {
@@ -338,6 +427,12 @@ class _SignInPageState extends State<SignInPage> {
               ),
               labelText:
                   passwordMistake ? 'Confirm Password *' : 'Confirm Password'),
+          //Save input
+          onChanged: (inPassword) {
+            setState(() {
+              confirmPassword = inPassword;
+            });
+          },
           onFieldSubmitted: (inPassword) {
             setState(() {
               confirmPassword = inPassword;
@@ -345,6 +440,7 @@ class _SignInPageState extends State<SignInPage> {
           },
         ),
       ),
+      ////////////////////////////////////BOTTOM TEXT//////////////////////////////
       Container(
         padding: EdgeInsets.all(10),
         alignment: Alignment.center,
@@ -370,6 +466,7 @@ class _SignInPageState extends State<SignInPage> {
           ]),
         ),
       ),
+      ///////////////////////////////////CONFIRM BUTTON/////////////////////////////////////
       Container(
           alignment: Alignment.center,
           width: 100,
@@ -394,6 +491,8 @@ class _SignInPageState extends State<SignInPage> {
 
                   passwordMistake = false;
                 });
+
+                //Try to create an account. Display any necessary error messages
                 try {
                   UserCredential userCredential = await FirebaseAuth.instance
                       .createUserWithEmailAndPassword(
@@ -448,6 +547,7 @@ class _SignInPageState extends State<SignInPage> {
     ];
   }
 
+  ////////////////////////RESET PASSWORD//////////////////////////////
   List<Widget> buildReset(BuildContext context) {
     return [
       Container(
@@ -465,8 +565,10 @@ class _SignInPageState extends State<SignInPage> {
         child: TextFormField(
           decoration: InputDecoration(
               labelStyle:
+                  //Change style if there is an error
                   TextStyle(color: usernameMistake ? Colors.red : Colors.black),
               labelText: usernameMistake ? 'Email Address *' : 'Email Address'),
+          //Save input
           onFieldSubmitted: (inEmail) {
             setState(() {
               emailAddress = inEmail;
@@ -475,6 +577,7 @@ class _SignInPageState extends State<SignInPage> {
           },
         ),
       ),
+      //////////////////////////////BOTTOM TEXT////////////////////////////////////////
       Container(
         padding: EdgeInsets.all(10),
         alignment: Alignment.center,
@@ -499,6 +602,7 @@ class _SignInPageState extends State<SignInPage> {
           ]),
         ),
       ),
+      /////////////////////////////////////CONFIRM BUTTON////////////////////////////////////////
       Container(
           alignment: Alignment.center,
           width: 100,

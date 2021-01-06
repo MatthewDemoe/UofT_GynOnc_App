@@ -13,15 +13,18 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
+  //Holds the first and last name strings of the user. Used for editing
   String firstName = '';
   String lastName = '';
 
+  //Used for building the page with different widgets if the user is editing their name
   bool editingName = false;
 
   @override
   void initState() {
     super.initState();
 
+    //Load the users name in from the database
     loadNames();
   }
 
@@ -38,6 +41,7 @@ class _AccountPageState extends State<AccountPage> {
                   child: ListView(
                     shrinkWrap: true,
                     children: [
+                      /////////////////////LOGO////////////////////////////
                       Container(
                         alignment: Alignment.topCenter,
                         padding: EdgeInsets.symmetric(vertical: 25),
@@ -47,14 +51,17 @@ class _AccountPageState extends State<AccountPage> {
                                 fit: BoxFit.fitHeight,
                                 image: AssetImage('assets/GynOnc_Logo.png'))),
                       ),
+                      //Container containing the list of widgets
                       Container(
                           alignment: Alignment.center,
                           padding: EdgeInsets.symmetric(vertical: 25),
                           child: Wrap(
                               alignment: WrapAlignment.center,
                               direction: Axis.horizontal,
+                              //Use a different list of children if the user would like to edit their name
                               children: editingName
                                   ? [
+                                      //If the user is editing their name, create form fields
                                       Container(
                                           padding: EdgeInsets.all(10),
                                           child: TextFormField(
@@ -62,6 +69,11 @@ class _AccountPageState extends State<AccountPage> {
                                             decoration: InputDecoration(
                                               labelText: 'New First Name',
                                             ),
+                                            onChanged: (inName) {
+                                              setState(() {
+                                                firstName = inName;
+                                              });
+                                            },
                                             onFieldSubmitted: (inName) {
                                               setState(() {
                                                 firstName = inName;
@@ -75,12 +87,18 @@ class _AccountPageState extends State<AccountPage> {
                                             decoration: InputDecoration(
                                               labelText: 'New Last Name',
                                             ),
+                                            onChanged: (inName) {
+                                              setState(() {
+                                                lastName = inName;
+                                              });
+                                            },
                                             onFieldSubmitted: (inName) {
                                               setState(() {
                                                 lastName = inName;
                                               });
                                             },
                                           )),
+                                      //Buttons for saving/cancelling. Display messages if necessary
                                       Container(
                                           padding: EdgeInsets.all(10),
                                           child: RaisedButton(
@@ -120,6 +138,8 @@ class _AccountPageState extends State<AccountPage> {
                                             },
                                           )),
                                     ]
+                                  //List for if the user is not editing their name
+                                  //Just pieces of text for display
                                   : <Widget>[
                                       Container(
                                           padding: EdgeInsets.all(5),
@@ -138,6 +158,7 @@ class _AccountPageState extends State<AccountPage> {
                                               inStyle: TextStyle(
                                                   fontSize:
                                                       getDefaultFontSize()))),
+                                      //Button that will start editing
                                       Container(
                                           child: IconButton(
                                               icon: Icon(Icons.edit),
@@ -147,14 +168,13 @@ class _AccountPageState extends State<AccountPage> {
                                                 });
                                               }))
                                     ])),
+                      //Displayy the user's email
                       Container(
-                          //width: MediaQuery.of(context).size.width * 0.8,
                           alignment: Alignment.center,
                           padding: EdgeInsets.symmetric(vertical: 50),
                           child: Wrap(
                             alignment: WrapAlignment.center,
                             direction: Axis.horizontal,
-                            // mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 'Email : ',
@@ -171,6 +191,7 @@ class _AccountPageState extends State<AccountPage> {
                               )),
                             ],
                           )),
+                      //Button to send the user a password reset email
                       Container(
                           alignment: Alignment.center,
                           padding: EdgeInsets.all(5),
@@ -189,6 +210,7 @@ class _AccountPageState extends State<AccountPage> {
                                   context, 'Reset link sent to your email.');
                             },
                           )),
+                      //Sign the current user out
                       Container(
                           alignment: Alignment.center,
                           padding: EdgeInsets.all(5),

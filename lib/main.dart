@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'package:uoft_gynonc_app/LoadingScreen.dart';
 import 'HomePage.dart';
 import 'VideoPage.dart';
@@ -17,6 +16,7 @@ Future<void> main() async {
     print('USER IS NOT NULL');
   } else {
     await mAuth.signInAnonymously();
+
     print('USER IS NULL');
   }
 
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Gyn Onc',
       theme: ThemeData(
-        primaryColor: getAppColor(),
+        primaryColor: Colors.cyan[700],
         primarySwatch: Colors.cyan,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),

@@ -71,6 +71,7 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
             : null,
         key: widget.scaffoldKey,
         body: Builder(builder: (context) {
+          //Show a notification when the timer runs out
           if (started)
             myTimer.subscribe(() {
               showSnackbar(context,
@@ -78,6 +79,7 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
             });
           return started
               ? CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
+                  //Display a persistent timer at the top of the screen
                   SliverPersistentHeader(
                       pinned: true, delegate: SliverTimerHeader(myTimer)),
                   SliverList(
@@ -119,7 +121,7 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
 
     updateMark(
         section: moduleID, mark: (percent * 100.0).round().toString() + '%');
-
+    //Display the link to further reading if one is provided
     if (widget.doc != null) {
       mark.add(Container(
           padding: EdgeInsets.only(bottom: 25),
@@ -156,6 +158,7 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
     StreamIterator<DocumentSnapshot> iterator =
         StreamIterator<DocumentSnapshot>(evalDoc);
 
+    //Create a timer with the information in the database if it's there, otherwise set the timer to unlimited
     if (await iterator.moveNext()) {
       if (iterator.current.data().containsKey('Timer')) {
         setState(() {
@@ -170,6 +173,7 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
     return false;
   }
 
+  //Initialize the timer, and subscribe to evaluate the questions when the timer runs out
   void createTimers({int durationMinutes}) {
     myTimer = VisualTimer(
         timerDuration: durationMinutes,
@@ -180,6 +184,7 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
     });
   }
 
+  //We use this function if we are loading questions in a module quiz
   Future<void> loadQuestions() async {
     Stream<QuerySnapshot> snap = FirebaseFirestore.instance
         .collection(widget.doc.reference.collection('Questions').path)
@@ -193,14 +198,17 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
       iterator.current.docs.forEach((element) {
         counter++;
 
+        //Create a question widget with the loaded question
         QuestionWidget tmp = QuestionWidget(
           doc: element,
           initialNum: counter,
           shouldShow: true,
         );
 
+        //Create a new list item set to false for the new question
         evaluations.add(0);
 
+        //When an answer is chosen, evaluate whether it is correct, and set the evaluation list item to reflect that
         tmp.evaluationEvent.subscribe((args) {
           evaluations[tmp.initialNum - 1] = args.value;
         });
@@ -211,10 +219,12 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
     }
   }
 
+  //We use this function if we are loading questions for the general evaluation
   Future<void> loadQuestionsGeneral() async {
     DocumentReference doc =
         FirebaseFirestore.instance.collection('Question Bank').doc('Questions');
 
+    //Load the questions from each module, then choose some amount of them at random
     int counter = 0;
     doc.snapshots().forEach((element) {
       numQuestions = element.data()['Num Questions'];
@@ -281,13 +291,13 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
     return FutureBuilder(
         future: initializeTimer(),
         builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-          //print(snapshot.connectionState);
           if (snapshot.hasData) {
             return Container(
                 alignment: Alignment.center,
                 child: ListView(
                   shrinkWrap: true,
                   children: [
+                    ///////////////////////Logo//////////////////////////
                     Container(
                       alignment: Alignment.center,
                       padding: EdgeInsets.symmetric(vertical: 50),
@@ -298,6 +308,7 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
                         image: AssetImage('assets/GynOnc_Logo.png'),
                       )),
                     ),
+                    ///////////////////Title///////////////////////////
                     Container(
                       padding: EdgeInsets.only(top: 50),
                       alignment: Alignment.center,
@@ -309,6 +320,7 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
                             color: Colors.grey[800]),
                       ),
                     ),
+                    ///////////////////////Timer Text////////////////////////
                     Container(
                       padding: EdgeInsets.only(top: 25),
                       alignment: Alignment.center,
@@ -324,6 +336,7 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
                             color: Colors.grey[800]),
                       ),
                     ),
+                    ///////////////////////////////////Start Button/////////////////////////////////////////
                     Container(
                         padding: EdgeInsets.all(50),
                         height: 200,
@@ -354,15 +367,18 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
         });
   }
 
+  //Function that will choose the questions randomly for the general evaluation page
   void chooseQuestions() {
     Random rng = new Random();
     int idx = 0;
 
+    //Loop for number of questions
     for (int i = 0; i < numQuestions; i++) {
+      //Choose a random index in the range
       idx = rng.nextInt(allQuestions.length - 1);
       evaluations.add(0);
 
-      //allQuestions[idx]
+      //Get the question at the random index, and create a new widget from it
       QuestionWidget q = allQuestions[idx];
 
       QuestionWidget tmp = new QuestionWidget(
@@ -376,6 +392,7 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
       });
 
       theQuestions.add(tmp);
+      //Remove the chosen question from the list of potential questions
       allQuestions.removeAt(idx);
     }
 

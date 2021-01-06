@@ -180,7 +180,7 @@ class _HomePageState extends State<HomePage> {
     return snapshot.data.docs
         .map((doc) => new ListTile(
               title: new Text(doc.id),
-              leading: Icon(Icons.receipt_long_outlined),
+              leading: Icon(Icons.receipt),
               onTap: () {
                 setState(() {
                   Navigator.pop(context);

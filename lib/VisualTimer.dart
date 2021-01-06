@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'CallbackTimer.dart';
 import 'package:bordered_text/bordered_text.dart';
-import 'package:cupertino_icons/cupertino_icons.dart';
 
 class VisualTimer extends StatefulWidget {
   VisualTimer({this.timerDuration, this.eTimer});
@@ -70,11 +69,13 @@ class _VisualTimerState extends State<VisualTimer>
                   alignment: Alignment.center,
                   overflow: Overflow.visible,
                   children: <Widget>[
+                        //The timer bar
                         LinearProgressIndicator(
                           minHeight: 10,
                           value: aController.value,
                         ),
                       ] +
+                      //The timer text
                       ((widget.timerDuration > 0)
                           ? [
                               Positioned(
@@ -97,12 +98,13 @@ class _VisualTimerState extends State<VisualTimer>
                               )
                             ]
                           : [
+                              //The infinity symbol
                               Positioned(
                                   top: -20,
                                   child: Container(
                                     alignment: Alignment.center,
                                     child: Icon(
-                                      CupertinoIcons.infinite,
+                                      CupertinoIcons.loop,
                                       color: Colors.grey[800],
                                       size: 48,
                                     ),

@@ -123,8 +123,9 @@ class _ComponentDirectorState extends State<ComponentDirector> {
       pageTitles.add(doc.data()['Page Title']);
       //If this document has 'video' in the name, create a video page from its video id field
       if (doc.id.contains('Video')) {
-        return new VideoPage(
-            id: doc.data()['Video ID'], title: doc.data()['Video ID']);
+        String videoURL = doc.data()['Video ID'];
+        String videoID = videoURL.split('=')[1];
+        return new VideoPage(id: videoID, title: videoID);
       }
 
       if (doc.id.contains('Reading')) {

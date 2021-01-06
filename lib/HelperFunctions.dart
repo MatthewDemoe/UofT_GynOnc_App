@@ -44,6 +44,7 @@ Future<Widget> getImage(String image) async {
   return img;
 }
 
+//Build an image widget from database takes a string which should be the name of a file in firebase
 Widget buildImage(String image) {
   return FutureBuilder(
       future: getImage(image),
@@ -68,7 +69,9 @@ Widget buildImage(String image) {
       });
 }
 
+//Updates the mark that is stored in firestore
 Future<void> updateMark({String section, String mark}) async {
+  //Location of the current user's information
   FirebaseFirestore.instance
       .collection('Users')
       .doc(FirebaseAuth.instance.currentUser.email)
@@ -80,6 +83,7 @@ Future<void> updateMark({String section, String mark}) async {
 
   int attempts = -1;
 
+  //The location of the section we care about
   Stream<DocumentSnapshot> snap = FirebaseFirestore.instance
       .collection('Users')
       .doc(FirebaseAuth.instance.currentUser.email)
@@ -135,6 +139,7 @@ void setNewName({String firstName, String lastName}) {
       .update({'Last Name': lastName});
 }
 
+//Get the first name string of the current user
 Future<String> getFirstNameString() async {
   Stream<DocumentSnapshot> doc = FirebaseFirestore.instance
       .collection('Users')
@@ -151,6 +156,7 @@ Future<String> getFirstNameString() async {
   return '';
 }
 
+//Get the last name string of the current user
 Future<String> getLastNameString() async {
   Stream<DocumentSnapshot> doc = FirebaseFirestore.instance
       .collection('Users')
@@ -167,6 +173,7 @@ Future<String> getLastNameString() async {
   return '';
 }
 
+//Create a widget from the first name of the current user
 Widget getFirstName({TextStyle inStyle}) {
   Stream<DocumentSnapshot> doc = FirebaseFirestore.instance
       .collection('Users')
@@ -188,10 +195,9 @@ Widget getFirstName({TextStyle inStyle}) {
       return CircularProgressIndicator();
     },
   );
-
-  //return name;
 }
 
+//Create a widget from the last name of the current user
 Widget getLastName({TextStyle inStyle}) {
   Stream<DocumentSnapshot> doc = FirebaseFirestore.instance
       .collection('Users')
@@ -215,6 +221,7 @@ Widget getLastName({TextStyle inStyle}) {
   );
 }
 
+//Show a snackbar with a message with an error icon
 void showErrorSnackbar(BuildContext context, String message) {
   Scaffold.of(context).showSnackBar(SnackBar(
     content: Row(children: [
@@ -231,6 +238,7 @@ void showErrorSnackbar(BuildContext context, String message) {
   ));
 }
 
+//Show a snackbar with a message
 void showSnackbar(BuildContext context, String message) {
   Scaffold.of(context).showSnackBar(SnackBar(
     content: Row(children: [
