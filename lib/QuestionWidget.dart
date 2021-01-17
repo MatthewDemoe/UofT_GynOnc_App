@@ -148,11 +148,12 @@ class _QuestionWidgetState extends State<QuestionWidget>
             activeColor: hideAnswers
                 ? Colors.blue
                 //If we are not hiding the answers, display radio buttons as either red or green
-                : doc.data()['isCorrect']
-                    ? Colors.green
-                    : Colors.red,
+                : doc.data()['isCorrect'] ? Colors.green : Colors.red,
             //The text the answer widget will display
-            title: Text(doc.data()['Answer']),
+            title: Text(
+              doc.data()['Answer'],
+              style: TextStyle(fontSize: getDefaultFontSize()),
+            ),
             //The enum value this answer represents
             value: SelectedAnswer.values[counter],
             //the enum variable

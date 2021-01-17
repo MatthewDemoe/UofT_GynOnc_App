@@ -65,6 +65,8 @@ class _AccountPageState extends State<AccountPage> {
                                       Container(
                                           padding: EdgeInsets.all(10),
                                           child: TextFormField(
+                                            style: TextStyle(
+                                                fontSize: getDefaultFontSize()),
                                             initialValue: firstName,
                                             decoration: InputDecoration(
                                               labelText: 'New First Name',
@@ -83,6 +85,8 @@ class _AccountPageState extends State<AccountPage> {
                                       Container(
                                           padding: EdgeInsets.all(10),
                                           child: TextFormField(
+                                            style: TextStyle(
+                                                fontSize: getDefaultFontSize()),
                                             initialValue: lastName,
                                             decoration: InputDecoration(
                                               labelText: 'New Last Name',

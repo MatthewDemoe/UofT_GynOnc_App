@@ -40,9 +40,6 @@ class _SignInPageState extends State<SignInPage> {
   bool passwordMistake = false;
   bool nameMistake = false;
 
-  //Test Size
-  double messageSize = 14.0;
-
   @override
   void initState() {
     super.initState();
@@ -126,10 +123,12 @@ class _SignInPageState extends State<SignInPage> {
           //We need to add the key to the object so that the list knows they are unique objects
           //Otherwise the input would not be cleared when we went to a different "screen"
           key: ObjectKey('Email Input'),
+          style: TextStyle(fontSize: getDefaultFontSize()),
           initialValue: '',
           decoration: InputDecoration(
-              labelStyle:
-                  TextStyle(color: usernameMistake ? Colors.red : Colors.black),
+              labelStyle: TextStyle(
+                  color: usernameMistake ? Colors.red : Colors.black,
+                  fontSize: getDefaultFontSize()),
               labelText: usernameMistake ? 'Email Address *' : 'Email Address'),
           //Set string when the user inputs anything
           onChanged: (inEmail) {
@@ -150,10 +149,12 @@ class _SignInPageState extends State<SignInPage> {
         padding: EdgeInsets.all(10),
         child: TextFormField(
           key: ObjectKey('Password Input'),
+          style: TextStyle(fontSize: getDefaultFontSize()),
           obscureText: obscurePassword,
           decoration: InputDecoration(
-              labelStyle:
-                  TextStyle(color: passwordMistake ? Colors.red : Colors.black),
+              labelStyle: TextStyle(
+                  fontSize: getDefaultFontSize(),
+                  color: passwordMistake ? Colors.red : Colors.black),
               suffixIcon: IconButton(
                 //button to toggle whether to hide the password
                 icon: Icon(Icons.visibility),
@@ -185,14 +186,15 @@ class _SignInPageState extends State<SignInPage> {
           text: TextSpan(children: [
             TextSpan(
                 text: 'Don\'t have an account? ',
-                style: TextStyle(color: Colors.black, fontSize: messageSize)),
+                style: TextStyle(
+                    color: Colors.black, fontSize: getDefaultFontSize())),
             //Sends us to create account page
             TextSpan(
                 text: 'Create one.',
                 style: TextStyle(
                     color: Colors.blue,
                     decoration: TextDecoration.underline,
-                    fontSize: messageSize),
+                    fontSize: getDefaultFontSize()),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () {
                     setState(() {
@@ -217,13 +219,14 @@ class _SignInPageState extends State<SignInPage> {
           text: TextSpan(children: [
             TextSpan(
                 text: 'Forgot your password? ',
-                style: TextStyle(color: Colors.black, fontSize: messageSize)),
+                style: TextStyle(
+                    color: Colors.black, fontSize: getDefaultFontSize())),
             TextSpan(
                 text: 'Reset it.',
                 style: TextStyle(
                     color: Colors.blue,
                     decoration: TextDecoration.underline,
-                    fontSize: messageSize),
+                    fontSize: getDefaultFontSize()),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () {
                     setState(() {
@@ -242,7 +245,7 @@ class _SignInPageState extends State<SignInPage> {
           child: RaisedButton(
             child: Text(
               'Next',
-              style: TextStyle(fontSize: 14, color: Colors.white),
+              style: getButtonTextStyle(),
             ),
             color: getAppColor(),
             //Try to sign in, send appropriate error messages
@@ -300,11 +303,13 @@ class _SignInPageState extends State<SignInPage> {
           //We need to add the key to the object so that the list knows they are unique objects
           //Otherwise the input would not be cleared when we went to a different "screen"
           key: ObjectKey('First Name Input'),
+          style: TextStyle(fontSize: getDefaultFontSize()),
           initialValue: '',
           //Change colour etc. when there is an error
           decoration: InputDecoration(
-              labelStyle:
-                  TextStyle(color: nameMistake ? Colors.red : Colors.black),
+              labelStyle: TextStyle(
+                  color: nameMistake ? Colors.red : Colors.black,
+                  fontSize: getDefaultFontSize()),
               labelText: nameMistake ? 'First Name *' : 'First Name'),
           //update stored name whenever user inputs
           onChanged: (inName) {
@@ -325,10 +330,12 @@ class _SignInPageState extends State<SignInPage> {
         padding: EdgeInsets.all(10),
         child: TextFormField(
           key: ObjectKey('Last Name Input'),
+          style: TextStyle(fontSize: getDefaultFontSize()),
           decoration: InputDecoration(
               //Change style if there's an error
-              labelStyle:
-                  TextStyle(color: nameMistake ? Colors.red : Colors.black),
+              labelStyle: TextStyle(
+                  color: nameMistake ? Colors.red : Colors.black,
+                  fontSize: getDefaultFontSize()),
               labelText: nameMistake ? 'Last Name *' : 'Last Name'),
           //Save input
           onChanged: (inName) {
@@ -349,10 +356,12 @@ class _SignInPageState extends State<SignInPage> {
         padding: EdgeInsets.all(10),
         child: TextFormField(
           key: ObjectKey('Email Input'),
+          style: TextStyle(fontSize: getDefaultFontSize()),
           decoration: InputDecoration(
               //Change style if there's an error
-              labelStyle:
-                  TextStyle(color: usernameMistake ? Colors.red : Colors.black),
+              labelStyle: TextStyle(
+                  color: usernameMistake ? Colors.red : Colors.black,
+                  fontSize: getDefaultFontSize()),
               labelText: usernameMistake ? 'Email Address *' : 'Email Address'),
           //Save input
           onChanged: (inEmail) {
@@ -375,11 +384,13 @@ class _SignInPageState extends State<SignInPage> {
         padding: EdgeInsets.all(10),
         child: TextFormField(
           key: ObjectKey('Password Input'),
+          style: TextStyle(fontSize: getDefaultFontSize()),
           obscureText: obscurePassword,
           decoration: InputDecoration(
               //Change style if there's an error
-              labelStyle:
-                  TextStyle(color: passwordMistake ? Colors.red : Colors.black),
+              labelStyle: TextStyle(
+                  color: passwordMistake ? Colors.red : Colors.black,
+                  fontSize: getDefaultFontSize()),
               //Toggle password visibility
               suffixIcon: IconButton(
                 icon: Icon(Icons.visibility),
@@ -411,11 +422,13 @@ class _SignInPageState extends State<SignInPage> {
         padding: EdgeInsets.all(10),
         child: TextFormField(
           key: ObjectKey('Confirm Password Input'),
+          style: TextStyle(fontSize: getDefaultFontSize()),
           obscureText: obscurePassword,
           decoration: InputDecoration(
               //Change style if there's a mistake
-              labelStyle:
-                  TextStyle(color: passwordMistake ? Colors.red : Colors.black),
+              labelStyle: TextStyle(
+                  color: passwordMistake ? Colors.red : Colors.black,
+                  fontSize: getDefaultFontSize()),
               //toggle password visibility
               suffixIcon: IconButton(
                 icon: Icon(Icons.visibility),
@@ -448,13 +461,14 @@ class _SignInPageState extends State<SignInPage> {
           text: TextSpan(children: [
             TextSpan(
                 text: 'Already have an account? ',
-                style: TextStyle(color: Colors.black, fontSize: messageSize)),
+                style: TextStyle(
+                    color: Colors.black, fontSize: getDefaultFontSize())),
             TextSpan(
                 text: 'Sign in.',
                 style: TextStyle(
                     color: Colors.blue,
                     decoration: TextDecoration.underline,
-                    fontSize: messageSize),
+                    fontSize: getDefaultFontSize()),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () {
                     setState(() {
@@ -563,10 +577,13 @@ class _SignInPageState extends State<SignInPage> {
         alignment: Alignment.center,
         padding: EdgeInsets.all(10),
         child: TextFormField(
+          style: TextStyle(fontSize: getDefaultFontSize()),
           decoration: InputDecoration(
               labelStyle:
                   //Change style if there is an error
-                  TextStyle(color: usernameMistake ? Colors.red : Colors.black),
+                  TextStyle(
+                      color: usernameMistake ? Colors.red : Colors.black,
+                      fontSize: getDefaultFontSize()),
               labelText: usernameMistake ? 'Email Address *' : 'Email Address'),
           //Save input
           onFieldSubmitted: (inEmail) {
@@ -585,13 +602,14 @@ class _SignInPageState extends State<SignInPage> {
           text: TextSpan(children: [
             TextSpan(
                 text: 'Don\'t need to reset your password? ',
-                style: TextStyle(color: Colors.black, fontSize: messageSize)),
+                style: TextStyle(
+                    color: Colors.black, fontSize: getDefaultFontSize())),
             TextSpan(
                 text: 'Return to sign in page.',
                 style: TextStyle(
                     color: Colors.blue,
                     decoration: TextDecoration.underline,
-                    fontSize: messageSize),
+                    fontSize: getDefaultFontSize()),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () {
                     setState(() {

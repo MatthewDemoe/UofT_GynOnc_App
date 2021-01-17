@@ -8,7 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 Color _appColor = Colors.cyan[700];
-double _defaultFontSize = 18.0;
+double _defaultFontSize = 14.0;
 
 Color getAppColor() {
   return _appColor;
@@ -16,6 +16,10 @@ Color getAppColor() {
 
 double getDefaultFontSize() {
   return _defaultFontSize;
+}
+
+void setDefaultFontSize(double newSize) {
+  _defaultFontSize = newSize;
 }
 
 TextStyle getButtonTextStyle() {
@@ -224,36 +228,34 @@ Widget getLastName({TextStyle inStyle}) {
 //Show a snackbar with a message with an error icon
 void showErrorSnackbar(BuildContext context, String message) {
   Scaffold.of(context).showSnackBar(SnackBar(
-    content: Row(children: [
-      Container(
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          child: Icon(Icons.warning)),
-      Text(message),
-    ]),
-    action: SnackBarAction(
-        label: 'Okay',
-        onPressed: () {
-          //Dismiss
-        }),
+    content: Wrap(
+        alignment: WrapAlignment.center,
+        direction: Axis.horizontal,
+        children: [
+          Container(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Icon(Icons.warning)),
+          Text(
+            message,
+            style: TextStyle(fontSize: getDefaultFontSize()),
+          ),
+        ]),
   ));
 }
 
 //Show a snackbar with a message
 void showSnackbar(BuildContext context, String message) {
   Scaffold.of(context).showSnackBar(SnackBar(
-    content: Row(children: [
-      Flexible(
-          child: Text(
-        message,
-        textAlign: TextAlign.center,
-      )),
-    ]),
-    action: SnackBarAction(
-        label: 'Okay',
-        onPressed: () {
-          //Dismiss
-        }),
-  ));
+      content: Wrap(
+          alignment: WrapAlignment.center,
+          direction: Axis.horizontal,
+          children: [
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: getDefaultFontSize()),
+        )
+      ])));
 }
 
 String buildTimerText(int timeLeft) {

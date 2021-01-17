@@ -4,33 +4,91 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ReadingPage extends StatelessWidget {
+class ReadingPage extends StatefulWidget {
   ReadingPage({Key key, this.title = 'Reading', this.doc}) : super(key: key);
 
   final String title;
   final QueryDocumentSnapshot doc;
 
   @override
+  _ReadingPageState createState() => _ReadingPageState();
+}
+
+class _ReadingPageState extends State<ReadingPage> {
+  bool isInitialized = false;
+
+  List<Widget> pageComponents = new List<Widget>();
+
+  @override
+  void initState() {
+    if (!isInitialized) {
+      initComponents();
+      print(
+          '------------------------------INITIALIZING--------------------------');
+    }
+
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: FirebaseFirestore.instance
-          .collection(doc.reference.collection('Content').path)
-          .snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (!snapshot.hasData)
-          return new Container(
-            alignment: Alignment.center,
-            height: 110.0,
-            width: 110.0,
-            //While we wait for data...
-            child: CircularProgressIndicator(),
-          );
-        return ListView(
-          physics: BouncingScrollPhysics(),
-          children: buildBody(context, snapshot),
-        );
-      },
-    );
+    return ListView(
+        addAutomaticKeepAlives: true,
+        physics: BouncingScrollPhysics(),
+        children: isInitialized
+            ? pageComponents
+            : [
+                CircularProgressIndicator(),
+              ]);
+  }
+
+  void initComponents() {
+    Stream<QuerySnapshot> col =
+        widget.doc.reference.collection('Content').snapshots();
+
+    col.listen((event) {
+      event.docs.forEach((element) {
+        print(element.id);
+
+        if (element.id.contains('Image')) {
+          pageComponents.add(buildImage(element.data()['Image']));
+        }
+
+        if (element.id.contains('Text') && !element.id.contains('Rich')) {
+          pageComponents.add(Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 25),
+              child: Text(
+                element.data()['Text'],
+                style: TextStyle(fontSize: getDefaultFontSize()),
+                textAlign: TextAlign.center,
+              )));
+        }
+
+        if (element.id.contains('Rich')) {
+          pageComponents.add(StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection(element.reference.collection('TextSpans').path)
+                .snapshots(),
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (!snapshot.hasData)
+                return new Container(
+                  alignment: Alignment.center,
+                  height: 110.0,
+                  width: 110.0,
+                  //While we wait for data...
+                  child: CircularProgressIndicator(),
+                );
+              return buildRichText(context, snapshot);
+            },
+          ));
+        }
+      });
+      setState(() {
+        isInitialized = true;
+      });
+    });
   }
 
   List<Widget> buildBody(

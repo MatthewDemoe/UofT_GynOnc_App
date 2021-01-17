@@ -113,7 +113,6 @@ class ModuleButton extends StatelessWidget {
                   builder: (context) => ComponentDirector(
                         title: 'First',
                         doc: doc,
-                        pageNum: 0,
                       )));
         },
         shape: RoundedRectangleBorder(

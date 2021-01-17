@@ -26,8 +26,10 @@ class _VerificationPageState extends State<VerificationPage> {
 
     FirebaseAuth.instance.authStateChanges().listen((User user) {
       if (user == null) {
+        user.reload();
+
         print('User is currently signed out!');
-        Navigator.pop(context);
+        //Navigator.pop(context);
         Navigator.push(
             context,
             //The button will return us to the previous page in the list
@@ -40,7 +42,7 @@ class _VerificationPageState extends State<VerificationPage> {
         theUser = user;
         if (user.emailVerified) {
           print('Email is Verified' + user.email);
-          Navigator.pop(context);
+          //Navigator.pop(context);
           Navigator.push(
               context,
               //The button will return us to the previous page in the list

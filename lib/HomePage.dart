@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:uoft_gynonc_app/AccountPage.dart';
 import 'package:uoft_gynonc_app/EvaluationBuilder.dart';
-import 'package:uoft_gynonc_app/GeneralEvaluationPage.dart';
 import 'package:uoft_gynonc_app/HelperFunctions.dart';
+import 'package:uoft_gynonc_app/SettingsPage.dart';
 import 'CategoryModules.dart';
 import 'SignInPage.dart';
 
@@ -123,7 +123,10 @@ class _HomePageState extends State<HomePage> {
 
               drawer.add(new ListTile(
                 leading: Icon(Icons.assignment),
-                title: Text('Overall Test'),
+                title: Text(
+                  'Overall Test',
+                  style: TextStyle(fontSize: getDefaultFontSize()),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.push(
@@ -136,20 +139,13 @@ class _HomePageState extends State<HomePage> {
                 },
               ));
 
-              drawer.add(new ListTile(
-                leading: Icon(
-                  Icons.chat,
-                ),
-                title: Text('About'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ));
-
               drawer.add(new Container(
                   child: ListTile(
                 leading: Icon(Icons.account_circle),
-                title: Text('Account'),
+                title: Text(
+                  'Account',
+                  style: TextStyle(fontSize: getDefaultFontSize()),
+                ),
                 onTap: () {
                   Navigator.push(
                       context,
@@ -162,9 +158,30 @@ class _HomePageState extends State<HomePage> {
 
               drawer.add(new ListTile(
                 leading: Icon(Icons.email),
-                title: Text('Contact Us'),
+                title: Text(
+                  'Contact Us',
+                  style: TextStyle(fontSize: getDefaultFontSize()),
+                ),
                 onTap: () {
                   Navigator.pop(context);
+                },
+              ));
+
+              drawer.add(new ListTile(
+                leading: Icon(
+                  Icons.settings,
+                ),
+                title: Text(
+                  'Settings',
+                  style: TextStyle(fontSize: getDefaultFontSize()),
+                ),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => SettingsPage(
+                                key: widget.key,
+                              ))).then((value) => setState(() {}));
                 },
               ));
 
@@ -179,7 +196,10 @@ class _HomePageState extends State<HomePage> {
     //Iterating through each document in the snapshot(each category)
     return snapshot.data.docs
         .map((doc) => new ListTile(
-              title: new Text(doc.id),
+              title: new Text(
+                doc.id,
+                style: TextStyle(fontSize: getDefaultFontSize()),
+              ),
               leading: Icon(Icons.receipt),
               onTap: () {
                 setState(() {
@@ -196,6 +216,7 @@ class _HomePageState extends State<HomePage> {
         .toList();
   }
 
+  //Initialize a user in the database with empty information
   void initializeUser() {
     FirebaseFirestore.instance
         .collection('Users')

@@ -13,7 +13,6 @@ class AnswerWidget extends StatefulWidget {
   final RadioListTile answerTile;
   final QueryDocumentSnapshot answer;
   final bool isCorrect;
-  //final int qNum;
 
   @override
   _AnswerWidgetState createState() => _AnswerWidgetState();
