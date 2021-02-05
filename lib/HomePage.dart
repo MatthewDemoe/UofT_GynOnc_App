@@ -71,6 +71,7 @@ class _HomePageState extends State<HomePage> {
     //Size of the phone screen - appbar
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: getBackgroundColor(),
       appBar: AppBar(
         elevation: 2,
         title: Text(widget.title),
@@ -89,104 +90,139 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       //A drawer that can be pulled out from the side of the screen
-      drawer: Drawer(
-        child: StreamBuilder<QuerySnapshot>(
-            //Look in the database for each category of module we have
-            stream: FirebaseFirestore.instance
-                .collection('/Module Categories ')
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              //Return a progress indicator if we need to wait for data
-              if (!snapshot.hasData)
-                return Container(
-                    height: 100.0,
-                    width: 100.0,
-                    child: CircularProgressIndicator());
-              List<Widget> drawer = [
-                Container(
-                  height: 100.0,
-                  //Block that appears at the top of the drawer
-                  child: DrawerHeader(
-                    child: header,
-                    decoration: BoxDecoration(
-                      color: getAppColor(),
+      drawer: Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor: getBackgroundColor(),
+        ),
+        child: Drawer(
+          child: StreamBuilder<QuerySnapshot>(
+              //Look in the database for each category of module we have
+              stream: FirebaseFirestore.instance
+                  .collection('/Module Categories ')
+                  .snapshots(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                //Return a progress indicator if we need to wait for data
+                if (!snapshot.hasData)
+                  return Container(
+                      height: 100.0,
+                      width: 100.0,
+                      child: CircularProgressIndicator());
+                List<Widget> drawer = [
+                  Container(
+                    height: 200.0,
+                    //Block that appears at the top of the drawer
+                    child: DrawerHeader(
+                      child: header,
+                      decoration: BoxDecoration(
+                        color: getAppColor(),
+                      ),
+                      margin: EdgeInsets.all(0),
                     ),
-                    margin: EdgeInsets.all(0),
                   ),
-                ),
-              ];
-              //Add a button for each module category we found in the database
-              drawer.addAll(getModuleCategories(snapshot).map((e) => e));
+                ];
+                //Add a button for each module category we found in the database
+                drawer.addAll(getModuleCategories(snapshot).map((e) => e));
 
-              //Also add some additional buttons
+                //Also add some additional buttons
 
-              drawer.add(new ListTile(
-                leading: Icon(Icons.assignment),
-                title: Text(
-                  'Overall Test',
-                  style: TextStyle(fontSize: getDefaultFontSize()),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => EvaluationBuilder(
-                                key: widget.key,
-                                title: 'General Evaluation',
-                              )));
-                },
-              ));
+                drawer.add(new ListTile(
+                  tileColor: getBackgroundColor(),
+                  leading: Icon(
+                    Icons.assignment,
+                    color: getFontColor(),
+                  ),
+                  title: Text(
+                    'Overall Test',
+                    style: TextStyle(
+                      fontSize: getPrefFontSize(),
+                      color: getFontColor(),
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => EvaluationBuilder(
+                                  key: widget.key,
+                                  title: 'General Evaluation',
+                                )));
+                  },
+                ));
 
-              drawer.add(new Container(
-                  child: ListTile(
-                leading: Icon(Icons.account_circle),
-                title: Text(
-                  'Account',
-                  style: TextStyle(fontSize: getDefaultFontSize()),
-                ),
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => AccountPage(
-                                key: widget.key,
-                              )));
-                },
-              )));
+                drawer.add(new Container(
+                    child: ListTile(
+                  tileColor: getBackgroundColor(),
+                  leading: Icon(
+                    Icons.account_circle,
+                    color: getFontColor(),
+                  ),
+                  title: Text(
+                    'Account',
+                    style: TextStyle(
+                      fontSize: getPrefFontSize(),
+                      color: getFontColor(),
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AccountPage(
+                                  key: widget.key,
+                                )));
+                  },
+                )));
 
-              drawer.add(new ListTile(
-                leading: Icon(Icons.email),
-                title: Text(
-                  'Contact Us',
-                  style: TextStyle(fontSize: getDefaultFontSize()),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ));
+                drawer.add(new ListTile(
+                  tileColor: getBackgroundColor(),
+                  leading: Icon(
+                    Icons.email,
+                    color: getFontColor(),
+                  ),
+                  title: Text(
+                    'Contact Us',
+                    style: TextStyle(
+                      fontSize: getPrefFontSize(),
+                      color: getFontColor(),
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ));
 
-              drawer.add(new ListTile(
-                leading: Icon(
-                  Icons.settings,
-                ),
-                title: Text(
-                  'Settings',
-                  style: TextStyle(fontSize: getDefaultFontSize()),
-                ),
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => SettingsPage(
-                                key: widget.key,
-                              ))).then((value) => setState(() {}));
-                },
-              ));
+                drawer.add(new ListTile(
+                  tileColor: getBackgroundColor(),
+                  leading: Icon(
+                    Icons.settings,
+                    color: getFontColor(),
+                  ),
+                  title: Text(
+                    'Settings',
+                    style: TextStyle(
+                      fontSize: getPrefFontSize(),
+                      color: getFontColor(),
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => SettingsPage(
+                                  key: widget.key,
+                                ))).then((value) {
+                      setState(() {
+                        categoryModules = new CategoryModules();
+                      });
+                    });
+                  },
+                ));
 
-              return new ListView(children: drawer);
-            }),
+                return new ListView(children: drawer);
+              }),
+        ),
       ),
     );
   }
@@ -196,11 +232,18 @@ class _HomePageState extends State<HomePage> {
     //Iterating through each document in the snapshot(each category)
     return snapshot.data.docs
         .map((doc) => new ListTile(
+              tileColor: getBackgroundColor(),
               title: new Text(
                 doc.id,
-                style: TextStyle(fontSize: getDefaultFontSize()),
+                style: TextStyle(
+                  fontSize: getPrefFontSize(),
+                  color: getFontColor(),
+                ),
               ),
-              leading: Icon(Icons.receipt),
+              leading: Icon(
+                Icons.receipt,
+                color: getFontColor(),
+              ),
               onTap: () {
                 setState(() {
                   Navigator.pop(context);

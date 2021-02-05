@@ -5,10 +5,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:uoft_gynonc_app/LoadingScreen.dart';
 import 'HomePage.dart';
 import 'VideoPage.dart';
+import 'HelperFunctions.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await initPrefs();
 
   FirebaseAuth mAuth = FirebaseAuth.instance;
   if (!(mAuth.currentUser == null)) {

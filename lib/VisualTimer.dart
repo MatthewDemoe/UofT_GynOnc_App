@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'CallbackTimer.dart';
 import 'package:bordered_text/bordered_text.dart';
 
@@ -91,7 +92,7 @@ class _VisualTimerState extends State<VisualTimer>
                                         child: Text(
                                           buildTimerText(),
                                           style: TextStyle(
-                                            fontSize: 18,
+                                            fontSize: 18 * getFontScale(),
                                             color: Colors.white,
                                           ),
                                         ))),

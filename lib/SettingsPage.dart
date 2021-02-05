@@ -9,11 +9,12 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  double _currentSliderValue = getDefaultFontSize();
+  double _currentSliderValue = getFontScale();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: getBackgroundColor(),
         appBar: AppBar(title: Text('Settings')),
         body: Container(
           alignment: Alignment.center,
@@ -36,7 +37,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   padding: EdgeInsets.only(top: 50, bottom: 25),
                   child: Text(
                     'Font Size: ' + _currentSliderValue.toString(),
-                    style: TextStyle(fontSize: getDefaultFontSize()),
+                    style: TextStyle(
+                      fontSize: getPrefFontSize(),
+                      color: getFontColor(),
+                    ),
                   )),
 
               Container(
@@ -44,18 +48,38 @@ class _SettingsPageState extends State<SettingsPage> {
                   padding: EdgeInsets.symmetric(vertical: 25),
                   child: Slider(
                     value: _currentSliderValue,
-                    min: 14,
-                    max: 36,
-                    divisions: 11,
+                    min: 1,
+                    max: 2,
+                    divisions: 10,
                     label: _currentSliderValue.toString(),
                     onChanged: (double val) {
-                      setDefaultFontSize(val);
+                      setFontScale(val);
 
                       setState(() {
                         _currentSliderValue = val;
                       });
                     },
                   )),
+
+              Container(
+                alignment: Alignment.topCenter,
+                padding: EdgeInsets.symmetric(vertical: 25),
+                child: RaisedButton(
+                  color: getAppColor(),
+                  onPressed: () {
+                    setState(() {
+                      prefs.toggleNightMode();
+                    });
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(15),
+                    child: Text(
+                      'Toggle Night Mode',
+                      style: getButtonTextStyle(),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ));

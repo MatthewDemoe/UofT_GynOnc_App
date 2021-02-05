@@ -61,6 +61,7 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
 
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: getBackgroundColor(),
         appBar: widget.doc == null
             ? AppBar(
                 title: Text(
@@ -114,7 +115,7 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
         child: Text(
           (percent * 100.0).round().toString() + '%',
           style: TextStyle(
-              fontSize: 48,
+              fontSize: 48 * getFontScale(),
               //Interpolate between green and red based on score
               color: Color.lerp(Colors.red, Colors.green, percent)),
         )));
@@ -123,30 +124,40 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
         section: moduleID, mark: (percent * 100.0).round().toString() + '%');
     //Display the link to further reading if one is provided
     if (widget.doc != null) {
-      mark.add(Container(
+      mark.add(
+        Container(
           padding: EdgeInsets.only(bottom: 25),
           child: RichText(
-              textAlign: TextAlign.center,
-              text: new TextSpan(children: [
-                TextSpan(
-                    text: 'Click ',
-                    style: TextStyle(
-                        color: Colors.black, fontSize: getDefaultFontSize())),
-                TextSpan(
-                    text: 'here',
-                    style: TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
-                        fontSize: getDefaultFontSize()),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        launch(widget.doc.data()['Link']);
-                      }),
-                TextSpan(
-                    text: ' for further reading.',
-                    style: TextStyle(
-                        color: Colors.black, fontSize: getDefaultFontSize())),
-              ]))));
+            textAlign: TextAlign.center,
+            text: new TextSpan(children: [
+              TextSpan(
+                text: 'Click ',
+                style: TextStyle(
+                  color: getFontColor(),
+                  fontSize: getPrefFontSize(),
+                ),
+              ),
+              TextSpan(
+                  text: 'here',
+                  style: TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                      fontSize: getPrefFontSize()),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      launch(widget.doc.data()['Link']);
+                    }),
+              TextSpan(
+                text: ' for further reading.',
+                style: TextStyle(
+                  color: getFontColor(),
+                  fontSize: getPrefFontSize(),
+                ),
+              ),
+            ]),
+          ),
+        ),
+      );
     }
   }
 
@@ -271,9 +282,13 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
               borderRadius: BorderRadius.circular(8),
             ),
             color: getAppColor(),
-            child: Text(
-              'Submit',
-              style: TextStyle(fontSize: 28, color: Colors.white),
+            child: Container(
+              padding: EdgeInsets.all(8),
+              child: Text(
+                'Submit',
+                style: TextStyle(
+                    fontSize: 28 * getFontScale(), color: Colors.white),
+              ),
             ),
 
             //Evaluate each answer when we click submit
@@ -310,19 +325,22 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
                     ),
                     ///////////////////Title///////////////////////////
                     Container(
-                      padding: EdgeInsets.only(top: 50),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 50, horizontal: 10),
                       alignment: Alignment.center,
                       child: Text(
                         moduleID + ' Evaluation',
                         style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[800]),
+                          fontSize: 24 * getFontScale(),
+                          fontWeight: FontWeight.bold,
+                          color: getFontColor(),
+                        ),
                       ),
                     ),
                     ///////////////////////Timer Text////////////////////////
                     Container(
-                      padding: EdgeInsets.only(top: 25),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 25, horizontal: 10),
                       alignment: Alignment.center,
                       child: Text(
                         (timerDuration > 0)
@@ -331,9 +349,10 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
                                 ((timerDuration == 1) ? ' minute.' : 'minutes.')
                             : 'Evaluation Time : Unlimited',
                         style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[800]),
+                          fontSize: 24 * getFontScale(),
+                          fontWeight: FontWeight.bold,
+                          color: getFontColor(),
+                        ),
                       ),
                     ),
                     ///////////////////////////////////Start Button/////////////////////////////////////////
@@ -345,10 +364,14 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8)),
                             color: getAppColor(),
-                            child: Text(
-                              'Start',
-                              style:
-                                  TextStyle(fontSize: 28, color: Colors.white),
+                            child: Container(
+                              padding: EdgeInsets.all(8),
+                              child: Text(
+                                'Start',
+                                style: TextStyle(
+                                    fontSize: 28 * getFontScale(),
+                                    color: Colors.white),
+                              ),
                             ),
                             onPressed: () {
                               if (widget.doc == null) {

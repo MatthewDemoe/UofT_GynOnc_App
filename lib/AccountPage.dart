@@ -31,6 +31,7 @@ class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: getBackgroundColor(),
         appBar: AppBar(
           elevation: 2,
           title: Text(widget.title),
@@ -66,10 +67,26 @@ class _AccountPageState extends State<AccountPage> {
                                           padding: EdgeInsets.all(10),
                                           child: TextFormField(
                                             style: TextStyle(
-                                                fontSize: getDefaultFontSize()),
+                                                color: getFontColor(),
+                                                fontSize: getPrefFontSize()),
                                             initialValue: firstName,
                                             decoration: InputDecoration(
+                                              enabledBorder:
+                                                  UnderlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: getFontColor(),
+                                                ),
+                                              ),
+                                              focusedBorder:
+                                                  UnderlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: getAppColor(),
+                                                ),
+                                              ),
                                               labelText: 'New First Name',
+                                              labelStyle: TextStyle(
+                                                color: getFontColor(),
+                                              ),
                                             ),
                                             onChanged: (inName) {
                                               setState(() {
@@ -86,10 +103,27 @@ class _AccountPageState extends State<AccountPage> {
                                           padding: EdgeInsets.all(10),
                                           child: TextFormField(
                                             style: TextStyle(
-                                                fontSize: getDefaultFontSize()),
+                                              fontSize: getPrefFontSize(),
+                                              color: getFontColor(),
+                                            ),
                                             initialValue: lastName,
                                             decoration: InputDecoration(
+                                              enabledBorder:
+                                                  UnderlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: getFontColor(),
+                                                ),
+                                              ),
+                                              focusedBorder:
+                                                  UnderlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: getAppColor(),
+                                                ),
+                                              ),
                                               labelText: 'New Last Name',
+                                              labelStyle: TextStyle(
+                                                color: getFontColor(),
+                                              ),
                                             ),
                                             onChanged: (inName) {
                                               setState(() {
@@ -107,9 +141,12 @@ class _AccountPageState extends State<AccountPage> {
                                           padding: EdgeInsets.all(10),
                                           child: RaisedButton(
                                             color: getAppColor(),
-                                            child: Text(
-                                              'Save',
-                                              style: getButtonTextStyle(),
+                                            child: Container(
+                                              padding: EdgeInsets.all(8),
+                                              child: Text(
+                                                'Save',
+                                                style: getButtonTextStyle(),
+                                              ),
                                             ),
                                             onPressed: () {
                                               if ((firstName == '') ||
@@ -131,9 +168,12 @@ class _AccountPageState extends State<AccountPage> {
                                           padding: EdgeInsets.all(10),
                                           child: RaisedButton(
                                             color: getAppColor(),
-                                            child: Text(
-                                              'Cancel',
-                                              style: getButtonTextStyle(),
+                                            child: Container(
+                                              padding: EdgeInsets.all(8),
+                                              child: Text(
+                                                'Cancel',
+                                                style: getButtonTextStyle(),
+                                              ),
                                             ),
                                             onPressed: () {
                                               setState(() {
@@ -150,22 +190,29 @@ class _AccountPageState extends State<AccountPage> {
                                           child: Text(
                                             'Name: ',
                                             style: TextStyle(
-                                                fontSize: getDefaultFontSize()),
+                                              fontSize: getPrefFontSize(),
+                                              color: getFontColor(),
+                                            ),
                                           )),
                                       Flexible(
                                           child: getFirstName(
                                               inStyle: TextStyle(
+                                                  color: getFontColor(),
                                                   fontSize:
-                                                      getDefaultFontSize()))),
+                                                      getPrefFontSize()))),
                                       Flexible(
                                           child: getLastName(
                                               inStyle: TextStyle(
+                                                  color: getFontColor(),
                                                   fontSize:
-                                                      getDefaultFontSize()))),
+                                                      getPrefFontSize()))),
                                       //Button that will start editing
                                       Container(
                                           child: IconButton(
-                                              icon: Icon(Icons.edit),
+                                              icon: Icon(
+                                                Icons.edit,
+                                                color: getFontColor(),
+                                              ),
                                               onPressed: () {
                                                 setState(() {
                                                   editingName = true;
@@ -182,15 +229,19 @@ class _AccountPageState extends State<AccountPage> {
                             children: [
                               Text(
                                 'Email : ',
-                                style:
-                                    TextStyle(fontSize: getDefaultFontSize()),
+                                style: TextStyle(
+                                  color: getFontColor(),
+                                  fontSize: getPrefFontSize(),
+                                ),
                                 textAlign: TextAlign.center,
                               ),
                               Flexible(
                                   child: Text(
                                 FirebaseAuth.instance.currentUser.email,
-                                style:
-                                    TextStyle(fontSize: getDefaultFontSize()),
+                                style: TextStyle(
+                                  color: getFontColor(),
+                                  fontSize: getPrefFontSize(),
+                                ),
                                 textAlign: TextAlign.center,
                               )),
                             ],
@@ -200,9 +251,12 @@ class _AccountPageState extends State<AccountPage> {
                           alignment: Alignment.center,
                           padding: EdgeInsets.all(5),
                           child: RaisedButton(
-                            child: Text(
-                              'Reset Password',
-                              style: getButtonTextStyle(),
+                            child: Container(
+                              padding: EdgeInsets.all(8),
+                              child: Text(
+                                'Reset Password',
+                                style: getButtonTextStyle(),
+                              ),
                             ),
                             color: getAppColor(),
                             onPressed: () {
@@ -219,16 +273,21 @@ class _AccountPageState extends State<AccountPage> {
                           alignment: Alignment.center,
                           padding: EdgeInsets.all(5),
                           child: RaisedButton(
-                            child: Text(
-                              'Sign Out',
-                              style: getButtonTextStyle(),
+                            child: Container(
+                              padding: EdgeInsets.all(8),
+                              child: Text(
+                                'Sign Out',
+                                style: getButtonTextStyle(),
+                              ),
                             ),
                             color: getAppColor(),
                             onPressed: () {
                               FirebaseAuth mAuth = FirebaseAuth.instance;
                               mAuth.signOut();
 
-                              Navigator.pop(context);
+                              while (Navigator.canPop(context)) {
+                                Navigator.pop(context);
+                              }
 
                               Navigator.push(
                                   context,

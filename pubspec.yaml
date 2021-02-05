@@ -24,6 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   event: ^1.1.4
+  shared_preferences: ^0.5.12+4
   youtube_player_flutter:
   firebase_core: ^0.5.0
   cloud_firestore: ^0.14.1+2

@@ -18,7 +18,7 @@ class VerificationPage extends StatefulWidget {
 class _VerificationPageState extends State<VerificationPage> {
   String verificationCode = '';
   User theUser;
-  double messageSize = 14.0;
+  double messageSize = 14.0 * getFontScale();
 
   @override
   void initState() {
@@ -71,7 +71,7 @@ class _VerificationPageState extends State<VerificationPage> {
                 Container(
                   child: Text(
                     'Check Email for Verification Link',
-                    style: TextStyle(fontSize: 32),
+                    style: TextStyle(fontSize: 32 * getFontScale()),
                     textAlign: TextAlign.center,
                   ),
                   padding: EdgeInsets.all(10),
@@ -103,9 +103,13 @@ class _VerificationPageState extends State<VerificationPage> {
                     width: 100,
                     padding: EdgeInsets.symmetric(vertical: 25),
                     child: RaisedButton(
-                      child: Text(
-                        'Verify',
-                        style: TextStyle(fontSize: 14, color: Colors.white),
+                      child: Container(
+                        padding: EdgeInsets.all(8),
+                        child: Text(
+                          'Verify',
+                          style: TextStyle(
+                              fontSize: messageSize, color: Colors.white),
+                        ),
                       ),
                       color: getAppColor(),
                       onPressed: () {

@@ -1,30 +1,50 @@
 library helpers;
 
 import 'dart:async';
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'Preferences.dart';
 
-Color _appColor = Colors.cyan[700];
-double _defaultFontSize = 14.0;
+Preferences prefs = Preferences();
+
+Future<bool> initPrefs() {
+  prefs = Preferences();
+  return prefs.init();
+}
+
+Color getBackgroundColor() {
+  return prefs.getBackgroundColor();
+}
+
+Color getFontColor() {
+  return prefs.getFontColor();
+}
 
 Color getAppColor() {
-  return _appColor;
+  return prefs.getAppColor();
 }
 
-double getDefaultFontSize() {
-  return _defaultFontSize;
+double getFontScale() {
+  return prefs.getFontScale();
 }
 
-void setDefaultFontSize(double newSize) {
-  _defaultFontSize = newSize;
+double getPrefFontSize() {
+  return prefs.getPrefFontSize();
+}
+
+bool getNightMode() {
+  return prefs.getNightMode();
+}
+
+void setFontScale(double newScale) {
+  prefs.setFontScale(newScale);
 }
 
 TextStyle getButtonTextStyle() {
   return TextStyle(
-    fontSize: _defaultFontSize,
+    fontSize: 20.0 * getFontScale(),
     color: Colors.white,
   );
 }
@@ -237,7 +257,7 @@ void showErrorSnackbar(BuildContext context, String message) {
               child: Icon(Icons.warning)),
           Text(
             message,
-            style: TextStyle(fontSize: getDefaultFontSize()),
+            style: TextStyle(fontSize: getPrefFontSize()),
           ),
         ]),
   ));
@@ -253,7 +273,7 @@ void showSnackbar(BuildContext context, String message) {
         Text(
           message,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: getDefaultFontSize()),
+          style: TextStyle(fontSize: getPrefFontSize()),
         )
       ])));
 }

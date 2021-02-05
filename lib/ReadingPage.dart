@@ -60,7 +60,10 @@ class _ReadingPageState extends State<ReadingPage> {
               padding: EdgeInsets.symmetric(horizontal: 15, vertical: 25),
               child: Text(
                 element.data()['Text'],
-                style: TextStyle(fontSize: getDefaultFontSize()),
+                style: TextStyle(
+                  fontSize: getPrefFontSize(),
+                  color: getFontColor(),
+                ),
                 textAlign: TextAlign.center,
               )));
         }
@@ -131,7 +134,10 @@ class _ReadingPageState extends State<ReadingPage> {
             padding: EdgeInsets.symmetric(horizontal: 15, vertical: 25),
             child: Text(
               doc.data()['Text'],
-              style: TextStyle(fontSize: getDefaultFontSize()),
+              style: TextStyle(
+                fontSize: getPrefFontSize(),
+                color: getFontColor(),
+              ),
               textAlign: TextAlign.center,
             ));
       }
@@ -173,7 +179,7 @@ class _ReadingPageState extends State<ReadingPage> {
                   style: TextStyle(
                       color: Colors.blue,
                       decoration: TextDecoration.underline,
-                      fontSize: getDefaultFontSize()),
+                      fontSize: getPrefFontSize()),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
                       launch(doc.data()['Link']);
@@ -182,7 +188,7 @@ class _ReadingPageState extends State<ReadingPage> {
             return TextSpan(
                 text: doc.data()['Text'],
                 style: TextStyle(
-                    color: Colors.black, fontSize: getDefaultFontSize()));
+                    color: getFontColor(), fontSize: getPrefFontSize()));
           }).toList())),
     );
   }

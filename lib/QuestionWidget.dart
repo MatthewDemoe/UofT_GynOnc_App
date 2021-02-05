@@ -85,7 +85,10 @@ class _QuestionWidgetState extends State<QuestionWidget>
                   //The text of the question, from firebase
                   widget.doc.data()['Question'],
               textAlign: TextAlign.left,
-              style: TextStyle(fontSize: getDefaultFontSize()),
+              style: TextStyle(
+                fontSize: getPrefFontSize(),
+                color: getFontColor(),
+              ),
             )),
         //Build our answers from the 'answers' collection
         StreamBuilder(
@@ -108,8 +111,13 @@ class _QuestionWidgetState extends State<QuestionWidget>
             //Initial evaluation
             widget.evaluationEvent.broadcast(ValueEventArgs(evaluateAnswer()));
 
-            return Column(
-              children: answerTiles,
+            return Theme(
+              data: Theme.of(context).copyWith(
+                unselectedWidgetColor: getFontColor(),
+              ),
+              child: Column(
+                children: answerTiles,
+              ),
             );
           },
         )
@@ -145,14 +153,20 @@ class _QuestionWidgetState extends State<QuestionWidget>
           isCorrect: doc.data()['isCorrect'],
           answerTile: RadioListTile<SelectedAnswer>(
             //If we are hiding the answers, display the radio button as blue
+
             activeColor: hideAnswers
                 ? Colors.blue
                 //If we are not hiding the answers, display radio buttons as either red or green
-                : doc.data()['isCorrect'] ? Colors.green : Colors.red,
+                : doc.data()['isCorrect']
+                    ? Colors.green
+                    : Colors.red,
             //The text the answer widget will display
             title: Text(
               doc.data()['Answer'],
-              style: TextStyle(fontSize: getDefaultFontSize()),
+              style: TextStyle(
+                fontSize: getPrefFontSize(),
+                color: getFontColor(),
+              ),
             ),
             //The enum value this answer represents
             value: SelectedAnswer.values[counter],

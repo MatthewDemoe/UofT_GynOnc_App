@@ -46,6 +46,7 @@ class _ComponentDirectorState extends State<ComponentDirector> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: getBackgroundColor(),
       body: isInitialized ? pages[pageNum] : CircularProgressIndicator(),
       appBar: AppBar(
         backgroundColor: getAppColor(),
