@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+String bullet = '• ';
+List<String> bullets = ['• ', '◦ ', '‣ ', '∙ ', '- '];
+
 class ReadingPage extends StatefulWidget {
   ReadingPage({Key key, this.title = 'Reading', this.doc}) : super(key: key);
 
@@ -38,13 +41,22 @@ class _ReadingPageState extends State<ReadingPage> {
         children: isInitialized
             ? pageComponents
             : [
-                CircularProgressIndicator(),
+                Container(
+                  padding: EdgeInsets.all(10),
+                  width: 200,
+                  height: 200,
+                  child: CircularProgressIndicator(),
+                )
               ]);
   }
 
   void initComponents() {
     Stream<QuerySnapshot> col =
         widget.doc.reference.collection('Content').snapshots();
+
+    pageComponents.add(Container(
+      padding: EdgeInsets.symmetric(vertical: 25),
+    ));
 
     col.listen((event) {
       event.docs.forEach((element) {
@@ -54,20 +66,113 @@ class _ReadingPageState extends State<ReadingPage> {
           pageComponents.add(buildImage(element.data()['Image']));
         }
 
-        if (element.id.contains('Text') && !element.id.contains('Rich')) {
-          pageComponents.add(Container(
-              alignment: Alignment.center,
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 25),
-              child: Text(
-                element.data()['Text'],
-                style: TextStyle(
-                  fontSize: getPrefFontSize(),
-                  color: getFontColor(),
-                ),
-                textAlign: TextAlign.center,
-              )));
+        if (element.id.contains('Table')) {
+          /*pageComponents.add(StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection(element.reference.collection('Content').path)
+                .snapshots(),
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (!snapshot.hasData)
+                return new Container(
+                  alignment: Alignment.center,
+                  height: 110.0,
+                  width: 110.0,
+                  //While we wait for data...
+                  child: CircularProgressIndicator(),
+                );
+              return buildTable(context, snapshot);
+            },
+          ));*/
+          pageComponents.add(Table(children: [])); //buildTable(element));
         }
 
+        if (element.id.contains('Text') && !element.id.contains('Rich')) {
+          //Create a header for a section
+          if (element.data().containsKey('Header')) {
+            pageComponents.add(Container(
+                alignment: Alignment.center,
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 7.5),
+                child: Text(
+                  element.data()['Text'].toString(),
+                  style: TextStyle(
+                    fontSize: getPrefFontSize() * 2,
+                    color: getFontColor(),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.left,
+                )));
+          }
+
+          //Mini Header
+          else if (element.data().containsKey('Bold')) {
+            pageComponents.add(Container(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 7.5),
+                child: Text(
+                  element.data()['Text'].toString(),
+                  style: TextStyle(
+                    fontSize: getPrefFontSize(),
+                    color: getFontColor(),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.left,
+                )));
+          }
+          //Create a list of bullet points
+          else if (element.data().containsKey('Bullets')) {
+            //Create a piece of text for each bullet
+            List<String> bulletList = new List<String>();
+
+            element.data()['Bullets'].forEach((textKey, bulletMap) {
+              bulletList.add(textKey);
+
+              bulletList.sort((a, b) {
+                int intA = int.parse(a.split(' ')[0]);
+                int intB = int.parse(b.split(' ')[0]);
+
+                return intA.compareTo(intB);
+              });
+            });
+
+            for (int i = 0; i < bulletList.length; i++) {
+              element.data()['Bullets'][bulletList[i]].forEach((key, indent) {
+                int goodIndent = 0;
+                if (indent.runtimeType == ''.runtimeType)
+                  goodIndent = int.parse(indent);
+                else
+                  goodIndent = indent;
+                pageComponents.add(Container(
+                    alignment: Alignment.centerLeft,
+                    padding: EdgeInsets.only(
+                        left: 15 + (30.0 * (goodIndent).toDouble()),
+                        top: 7,
+                        bottom: 7,
+                        right: 15),
+                    child: Text(
+                      bullets[goodIndent] + key,
+                      style: TextStyle(
+                        fontSize: getPrefFontSize(),
+                        color: getFontColor(),
+                      ),
+                      textAlign: TextAlign.left,
+                    )));
+              });
+            }
+          } else {
+            pageComponents.add(Container(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 7.5),
+                child: Text(
+                  element.data()['Text'].toString(),
+                  style: TextStyle(
+                    fontSize: getPrefFontSize(),
+                    color: getFontColor(),
+                  ),
+                  textAlign: TextAlign.left,
+                )));
+          }
+        }
         if (element.id.contains('Rich')) {
           pageComponents.add(StreamBuilder(
             stream: FirebaseFirestore.instance
@@ -90,66 +195,80 @@ class _ReadingPageState extends State<ReadingPage> {
       });
       setState(() {
         isInitialized = true;
+        pageComponents.add(Container(
+          padding: EdgeInsets.symmetric(vertical: 25),
+        ));
       });
     });
   }
 
-  List<Widget> buildBody(
-      BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-    return snapshot.data.docs.map((doc) {
-      if (doc.id.contains('Image')) {
-        return FutureBuilder(
-            builder: (context, snapshot) {
-              //Display progress indicators while we are waiting for the icon
-              if (snapshot.connectionState == ConnectionState.waiting)
-                return Container(
-                  height: 110.0,
-                  width: 110.0,
-                  child: CircularProgressIndicator(),
-                );
+  Widget buildTable(QueryDocumentSnapshot doc) {
+    /*return Container(
+        padding: EdgeInsets.all(10),
+        child: Table(
+          border: TableBorder.all(),
+          children: buildTableRows(context, snapshot),
+        ));*/
 
-              if (snapshot.connectionState == ConnectionState.done)
-                return Container(
-                    padding: EdgeInsets.all(10),
-                    child: snapshot.hasData
-                        ? snapshot.data
-                        : CircularProgressIndicator());
+    List<String> rowList = new List<String>();
+
+    doc.data()['Table'].forEach((textKey, bulletMap) {
+      rowList.add(textKey);
+
+      rowList.sort((a, b) {
+        int intA = int.parse(a.split(' ')[0]);
+        int intB = int.parse(b.split(' ')[0]);
+
+        return intA.compareTo(intB);
+      });
+    });
+
+    for (int i = 0; i < rowList.length; i++) {
+      doc.data()['Table'][rowList[i]].forEach((key, cell) {
+        cell.forEach((cellKey, indent) {
+          int goodIndent = 0;
+          if (indent.runtimeType == ''.runtimeType)
+            goodIndent = int.parse(indent);
+          else
+            goodIndent = indent;
+          pageComponents.add(Container(
+              alignment: Alignment.centerLeft,
+              padding: EdgeInsets.only(
+                  left: 15 + (30.0 * (goodIndent).toDouble()),
+                  top: 7,
+                  bottom: 7,
+                  right: 15),
+              child: Text(
+                bullets[goodIndent] + key,
+                style: TextStyle(
+                  fontSize: getPrefFontSize(),
+                  color: getFontColor(),
+                ),
+                textAlign: TextAlign.left,
+              )));
+        });
+      });
+    }
+  }
+
+  List<TableRow> buildTableRows(
+      BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+    List<TableRow> rows = new List<TableRow>();
+
+    return snapshot.data.docs.map((doc) {
+      print(doc.id);
+      List<Widget> rowChildren = new List<Widget>();
+
+      return TableRow(children: [
+        StreamBuilder(
+          stream: doc.reference.collection('Content').snapshots(),
+          builder: (cont, snap) {
+            if (snap.hasData) {
+              print('TEST');
 
               return Container(
-                height: 110.0,
-                width: 110.0,
-                child: CircularProgressIndicator(),
-              );
-            },
-
-            //The image we are waiting to receive
-            future: getImage(
-              doc.data()['Image'],
-            ));
-      }
-
-      if (doc.id.contains('Text') && !doc.id.contains('Rich')) {
-        return Container(
-            alignment: Alignment.center,
-            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 25),
-            child: Text(
-              doc.data()['Text'],
-              style: TextStyle(
-                fontSize: getPrefFontSize(),
-                color: getFontColor(),
-              ),
-              textAlign: TextAlign.center,
-            ));
-      }
-
-      if (doc.id.contains('Rich')) {
-        return StreamBuilder(
-          stream: FirebaseFirestore.instance
-              .collection(doc.reference.collection('TextSpans').path)
-              .snapshots(),
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (!snapshot.hasData)
+                  child: Column(children: buildTableCell(cont, snap)));
+            } else
               return new Container(
                 alignment: Alignment.center,
                 height: 110.0,
@@ -157,20 +276,156 @@ class _ReadingPageState extends State<ReadingPage> {
                 //While we wait for data...
                 child: CircularProgressIndicator(),
               );
-            return buildRichText(context, snapshot);
           },
-        );
+        )
+      ]);
+
+      /*doc.reference.collection('Content').snapshots().map((event) {
+        print("TEST");
+        print(event.docs.length);
+        event.docs.map((element) {
+          print(element.id);
+          if (element.data().containsKey('Bullets')) {
+            //Create a piece of text for each bullet
+            List<String> bulletList = new List<String>();
+
+            element.data()['Bullets'].forEach((textKey, bulletMap) {
+              bulletList.add(textKey);
+
+              bulletList.sort((a, b) {
+                int intA = int.parse(a.split(' ')[0]);
+                int intB = int.parse(b.split(' ')[0]);
+
+                return intA.compareTo(intB);
+              });
+            });
+
+            for (int i = 0; i < bulletList.length; i++) {
+              element.data()['Bullets'][bulletList[i]].forEach((key, indent) {
+                int goodIndent = 0;
+                if (indent.runtimeType == ''.runtimeType)
+                  goodIndent = int.parse(indent);
+                else
+                  goodIndent = indent;
+
+                /*rowChildren.add(Container(
+                    alignment: Alignment.centerLeft,
+                    padding: EdgeInsets.only(
+                        left: 15 + (30.0 * (goodIndent).toDouble()),
+                        top: 7,
+                        bottom: 7,
+                        right: 15),
+                    child: Text(
+                      bullets[goodIndent] + key,
+                      style: TextStyle(
+                        fontSize: getPrefFontSize(),
+                        color: getFontColor(),
+                      ),
+                      textAlign: TextAlign.left,
+                    )));*/
+              });
+            }
+          } else {
+            pageComponents.add(Container(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 7.5),
+                child: Text(
+                  element.data()['Text'].toString(),
+                  style: TextStyle(
+                    fontSize: getPrefFontSize(),
+                    color: getFontColor(),
+                  ),
+                  textAlign: TextAlign.left,
+                )));
+          }
+        });
+      });
+
+      return TableRow(children: rowChildren);*/
+    }).toList();
+
+    //return rows;
+  }
+
+  List<Widget> buildTableCell(
+      BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+    List<Widget> cells = new List<Widget>();
+
+    print(snapshot.data.docs.length);
+    return snapshot.data.docs.map((doc) {
+      print('CELL: ' + doc.id);
+      if (doc.data().containsKey('Bullets')) {
+        print('BULLETS');
+        //Create a piece of text for each bullet
+        List<String> bulletList = new List<String>();
+
+        doc.data()['Bullets'].forEach((textKey, bulletMap) {
+          bulletList.add(textKey);
+
+          bulletList.sort((a, b) {
+            int intA = int.parse(a.split(' ')[0]);
+            int intB = int.parse(b.split(' ')[0]);
+
+            return intA.compareTo(intB);
+          });
+        });
+
+        for (int i = 0; i < bulletList.length; i++) {
+          doc.data()['Bullets'][bulletList[i]].forEach((key, indent) {
+            int goodIndent = 0;
+            if (indent.runtimeType == ''.runtimeType)
+              goodIndent = int.parse(indent);
+            else
+              goodIndent = indent;
+            cells.add(Container(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.only(
+                    left: 15 + (30.0 * (goodIndent).toDouble()),
+                    top: 7,
+                    bottom: 7,
+                    right: 15),
+                child: Text(
+                  bullets[goodIndent] + key,
+                  style: TextStyle(
+                    fontSize: getPrefFontSize(),
+                    color: getFontColor(),
+                  ),
+                  textAlign: TextAlign.left,
+                )));
+          });
+
+          return Row(
+            children: cells,
+          );
+        }
+      } else {
+        print(doc.data()['Text'].toString());
+        return (Container(
+            alignment: Alignment.centerLeft,
+            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 7.5),
+            child: Text(
+              doc.data()['Text'].toString(),
+              style: TextStyle(
+                fontSize: getPrefFontSize(),
+                color: getFontColor(),
+              ),
+              textAlign: TextAlign.left,
+            )));
       }
     }).toList();
+
+    //print(cells.length);
+
+    //return cells;
   }
 
   Widget buildRichText(
       BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 25),
+      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
       alignment: Alignment.center,
       child: RichText(
-          textAlign: TextAlign.center,
+          textAlign: TextAlign.left,
           text: new TextSpan(
               children: snapshot.data.docs.map((doc) {
             if (doc.data().containsKey('Link'))
