@@ -9,6 +9,8 @@ class Preferences {
 
   SharedPreferences prefs;
 
+  String bullet = '•';
+
   Color _appColor = Colors.cyan[700];
   double _defaultFontSize = 14.0;
   double _fontScale = 1;
