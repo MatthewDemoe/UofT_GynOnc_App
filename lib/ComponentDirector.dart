@@ -7,6 +7,7 @@ import 'package:uoft_gynonc_app/HelperFunctions.dart';
 import 'VideoPage.dart';
 import 'AnimatedComponent.dart';
 import 'ReadingPage.dart';
+import 'TableOfContentsPage.dart';
 
 //Widget for navigating through components of a module
 class ComponentDirector extends StatefulWidget {
@@ -30,9 +31,9 @@ class _ComponentDirectorState extends State<ComponentDirector> {
   int numPages = 0;
 
   //The titles for each page
-  List<String> pageTitles = new List<String>();
+  List<String> pageTitles = [];
 
-  List<AnimatedComponent> pages = new List<AnimatedComponent>();
+  List<AnimatedComponent> pages = [];
 
   bool isInitialized = false;
 
@@ -73,7 +74,8 @@ class _ComponentDirectorState extends State<ComponentDirector> {
                 onPressed: () {
                   pages[pageNum].transition(whenComplete: () {
                     setState(() {
-                      pageNum = (pageNum -= 1).clamp(0, numPages - 1);
+                      flipPage(-1);
+                      //pageNum = (pageNum -= 1).clamp(0, numPages - 1);
                     });
                   });
                 }),
@@ -84,13 +86,23 @@ class _ComponentDirectorState extends State<ComponentDirector> {
                 onPressed: () {
                   pages[pageNum].transition(whenComplete: () {
                     setState(() {
-                      pageNum = (pageNum += 1).clamp(0, numPages - 1);
+                      flipPage(1);
+                      //pageNum = (pageNum += 1).clamp(0, numPages - 1);
                     });
                   });
                 }),
         ],
       ),
     );
+  }
+
+  void flipPage(int dir)
+  {    
+    pages[pageNum].transition(whenComplete: () {
+      setState(() {
+        pageNum = (pageNum += dir).clamp(0, numPages - 1);
+      });
+    });                
   }
 
   void initComponents() {
@@ -101,11 +113,31 @@ class _ComponentDirectorState extends State<ComponentDirector> {
 
     int counter = 0;
 
+  /*
+   col.listen((event) {
+      event.docs.forEach((element) {
+        counter++;
+
+        pageTitles.add(element.data()['Page Title']);
+
+      });
+    });*/
+    
+    /*
+    pages.add(new AnimatedComponent(
+      key : ObjectKey(0), 
+      child: new TableOfContentsPage(
+        pageTitles : pageTitles, 
+        function: (i) => flipPage(i),))
+        );
+        */
+
+    counter = 0;
+
     col.listen((event) {
       event.docs.forEach((element) {
         counter++;
 
-        print(element.data()['Page Title']);
         pageTitles.add(element.data()['Page Title']);
 
         if (element.id.contains('Video')) {

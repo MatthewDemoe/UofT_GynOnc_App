@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'Preferences.dart';
+import 'package:photo_view/photo_view.dart';
 
 Preferences prefs = Preferences();
 
@@ -60,7 +61,7 @@ Future<Widget> getImage(String image) async {
       //Get the URL from the reference
       .getDownloadURL()
       //Get the actual image from the URL
-      .then((value) => img = Image.network(
+      .then((value) => img =  Image.network(
             value.toString(),
             fit: BoxFit.scaleDown,
           ));

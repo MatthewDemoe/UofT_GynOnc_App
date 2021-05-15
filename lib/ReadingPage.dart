@@ -129,6 +129,7 @@ class _ReadingPageState extends State<ReadingPage> {
       }
 
       if (doc.id.contains('Text') && !doc.id.contains('Rich')) {
+        print("TEXT PAGE");
         return Container(
             alignment: Alignment.center,
             padding: EdgeInsets.symmetric(horizontal: 15, vertical: 25),
