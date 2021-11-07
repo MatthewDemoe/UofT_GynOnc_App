@@ -12,26 +12,39 @@ class TableOfContentsPage extends StatelessWidget
   Widget build(BuildContext context) {
   return ListView(
     physics: BouncingScrollPhysics(), 
-    children: createButtons(),
+    children: <Widget>[
+      Container(
+        padding: EdgeInsets.all(8),
+        height: 200,
+        child: buildImage('GynOnc_Logo.png'))
+        ]
+        + createButtons(),
   );    
   }
 
-  List<TextButton> createButtons()
+  List<Widget> createButtons()
   {
-    List<TextButton> buttons = new List<TextButton>();
+    List<Widget> buttons = [];
 
     for(int i = 0; i < pageTitles.length; i++)
     {
-      buttons.add(new TextButton(
+      buttons.add(new Container(
+        padding: EdgeInsets.symmetric(vertical: (5), horizontal: (20)),
+        alignment: Alignment.centerLeft,
+        child: TextButton(
+          
         child: Text(
-          i.toString() + ". " + pageTitles[i],
+          (i + 1).toString() + ". " + pageTitles[i],
+          textAlign: TextAlign.left,
           style: TextStyle(
+            
             fontSize: getPrefFontSize(),
             color: Colors.blue,
             ),
           ),
-        onPressed: function(i),
-        ));
+          
+        onPressed: () => function(i),
+        )));
     }
 
     return buttons;

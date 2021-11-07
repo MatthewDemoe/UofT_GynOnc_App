@@ -24,6 +24,9 @@ class _HomePageState extends State<HomePage> {
   Widget header;
   List<String> moduleNames = new List<String>();
 
+  bool preQuizCompleted = false;
+  bool finishedLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -54,8 +57,8 @@ class _HomePageState extends State<HomePage> {
               .doc(FirebaseAuth.instance.currentUser.email)
               .update({})
           : initializeUser();
-    });
-
+    });  
+    
     moduleNames.forEach((element) {
       print(element);
     });
@@ -70,6 +73,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     //Size of the phone screen - appbar
     final Size size = MediaQuery.of(context).size;
+  
+    checkIfPreQuizComplete();
+
     return Scaffold(
       backgroundColor: getBackgroundColor(),
       appBar: AppBar(
@@ -287,5 +293,34 @@ class _HomePageState extends State<HomePage> {
         });
       });
     });
+  }
+
+  Future<void> checkIfPreQuizComplete() async{
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser.email)
+        .collection('Evaluations')
+        .doc('Marks').snapshots()
+        .forEach((element) {
+
+          bool completed = (element.data()['Overall Evaluation'] as String) != 'Not Attempted';
+
+          print(element.data()['Overall Evaluation']);      
+          preQuizCompleted = completed;                          
+          print(preQuizCompleted); 
+
+          if(!preQuizCompleted){
+          Navigator.pop(context);
+              Navigator.push(context, 
+                MaterialPageRoute(
+                  builder: (context) => EvaluationBuilder(
+                    key: widget.key,
+                    title: 'General Evaluation',
+                  ))
+              );
+        }
+          
+          
+        });       
   }
 }

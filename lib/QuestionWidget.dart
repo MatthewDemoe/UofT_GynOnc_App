@@ -37,6 +37,8 @@ class _QuestionWidgetState extends State<QuestionWidget>
   SelectedAnswer selectedAnswer = SelectedAnswer.q1;
   //A list of all the possible answers for this question
   List<AnswerWidget> answerTiles = new List<AnswerWidget>();
+  List<int> answerOrder = new List<int>();
+  bool shuffled = false;
 
   Widget img;
 
@@ -67,9 +69,6 @@ class _QuestionWidgetState extends State<QuestionWidget>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
-    //print(widget.doc.data()['Question']);
-
     return Container(
       padding: EdgeInsets.all(10),
       //Arrange questions in a column
@@ -105,8 +104,10 @@ class _QuestionWidgetState extends State<QuestionWidget>
                 child: CircularProgressIndicator(),
               );
             }
+            
+            List<AnswerWidget> tmp = formAnswers(snapshot);
 
-            answerTiles = formAnswers(snapshot);
+            answerTiles = answerOrder.map((e) => tmp[e]).toList();   
 
             //Initial evaluation
             widget.evaluationEvent.broadcast(ValueEventArgs(evaluateAnswer()));
@@ -137,7 +138,6 @@ class _QuestionWidgetState extends State<QuestionWidget>
       }
     });
 
-    //hideAnswers = false;
     return toReturn;
   }
 
@@ -147,6 +147,10 @@ class _QuestionWidgetState extends State<QuestionWidget>
     if (snapshot.data != null) {
       List<Widget> answers = snapshot.data.docs.map((doc) {
         counter++;
+
+        if(!shuffled)
+          answerOrder.add(counter);
+
         return AnswerWidget(
           answer: doc,
           //is this the correct answer?
@@ -183,6 +187,12 @@ class _QuestionWidgetState extends State<QuestionWidget>
           ),
         );
       }).toList();
+
+      if(!shuffled)
+      {
+        answerOrder.shuffle();
+        shuffled = true;
+      }
 
       return answers;
     }

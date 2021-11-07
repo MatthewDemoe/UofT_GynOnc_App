@@ -23,7 +23,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
       if (user.isAnonymous) {
         print('User is currently signed out!');
-        //Navigator.pop(context);
+        Navigator.pop(context);
         Navigator.push(
             context,
             //The button will return us to the previous page in the list
@@ -35,7 +35,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         isSignedIn = false;
       } else if ((!user.isAnonymous) && user.emailVerified) {
         print('User is signed in! : ' + user.email);
-        //Navigator.pop(context);
+        Navigator.pop(context);
         Navigator.push(
             context,
             //The button will return us to the previous page in the list
@@ -48,7 +48,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         print(user.isAnonymous);
       } else {
         print('User is signed in but unverified! : ' + user.email);
-        //Navigator.pop(context);
+        Navigator.pop(context);
         Navigator.push(
             context,
             //The button will return us to the previous page in the list

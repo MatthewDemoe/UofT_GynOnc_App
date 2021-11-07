@@ -26,8 +26,6 @@ class _ReadingPageState extends State<ReadingPage> {
   void initState() {
     if (!isInitialized) {
       initComponents();
-      print(
-          '------------------------------INITIALIZING--------------------------');
     }
 
     super.initState();
@@ -60,31 +58,9 @@ class _ReadingPageState extends State<ReadingPage> {
 
     col.listen((event) {
       event.docs.forEach((element) {
-        print(element.id);
 
         if (element.id.contains('Image')) {
-          pageComponents.add(buildImage(element.data()['Image']));
-        }
-
-        if (element.id.contains('Table')) {
-          /*pageComponents.add(StreamBuilder(
-            stream: FirebaseFirestore.instance
-                .collection(element.reference.collection('Content').path)
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (!snapshot.hasData)
-                return new Container(
-                  alignment: Alignment.center,
-                  height: 110.0,
-                  width: 110.0,
-                  //While we wait for data...
-                  child: CircularProgressIndicator(),
-                );
-              return buildTable(context, snapshot);
-            },
-          ));*/
-          pageComponents.add(Table(children: [])); //buildTable(element));
+          pageComponents.add(buildZoomableImage(element.data()['Image']));
         }
 
         if (element.id.contains('Text') && !element.id.contains('Rich')) {
@@ -134,7 +110,6 @@ class _ReadingPageState extends State<ReadingPage> {
                 return intA.compareTo(intB);
               });
             });
-
             for (int i = 0; i < bulletList.length; i++) {
               element.data()['Bullets'][bulletList[i]].forEach((key, indent) {
                 int goodIndent = 0;
@@ -173,6 +148,8 @@ class _ReadingPageState extends State<ReadingPage> {
                 )));
           }
         }
+
+        //Rich text for hyperlinks 
         if (element.id.contains('Rich')) {
           pageComponents.add(StreamBuilder(
             stream: FirebaseFirestore.instance
@@ -203,13 +180,6 @@ class _ReadingPageState extends State<ReadingPage> {
   }
 
   Widget buildTable(QueryDocumentSnapshot doc) {
-    /*return Container(
-        padding: EdgeInsets.all(10),
-        child: Table(
-          border: TableBorder.all(),
-          children: buildTableRows(context, snapshot),
-        ));*/
-
     List<String> rowList = new List<String>();
 
     doc.data()['Table'].forEach((textKey, bulletMap) {
@@ -256,7 +226,6 @@ class _ReadingPageState extends State<ReadingPage> {
     List<TableRow> rows = new List<TableRow>();
 
     return snapshot.data.docs.map((doc) {
-      print(doc.id);
       List<Widget> rowChildren = new List<Widget>();
 
       return TableRow(children: [
@@ -264,7 +233,6 @@ class _ReadingPageState extends State<ReadingPage> {
           stream: doc.reference.collection('Content').snapshots(),
           builder: (cont, snap) {
             if (snap.hasData) {
-              print('TEST');
 
               return Container(
                   child: Column(children: buildTableCell(cont, snap)));
@@ -280,82 +248,15 @@ class _ReadingPageState extends State<ReadingPage> {
         )
       ]);
 
-      /*doc.reference.collection('Content').snapshots().map((event) {
-        print("TEST");
-        print(event.docs.length);
-        event.docs.map((element) {
-          print(element.id);
-          if (element.data().containsKey('Bullets')) {
-            //Create a piece of text for each bullet
-            List<String> bulletList = new List<String>();
+        }).toList();
 
-            element.data()['Bullets'].forEach((textKey, bulletMap) {
-              bulletList.add(textKey);
-
-              bulletList.sort((a, b) {
-                int intA = int.parse(a.split(' ')[0]);
-                int intB = int.parse(b.split(' ')[0]);
-
-                return intA.compareTo(intB);
-              });
-            });
-
-            for (int i = 0; i < bulletList.length; i++) {
-              element.data()['Bullets'][bulletList[i]].forEach((key, indent) {
-                int goodIndent = 0;
-                if (indent.runtimeType == ''.runtimeType)
-                  goodIndent = int.parse(indent);
-                else
-                  goodIndent = indent;
-
-                /*rowChildren.add(Container(
-                    alignment: Alignment.centerLeft,
-                    padding: EdgeInsets.only(
-                        left: 15 + (30.0 * (goodIndent).toDouble()),
-                        top: 7,
-                        bottom: 7,
-                        right: 15),
-                    child: Text(
-                      bullets[goodIndent] + key,
-                      style: TextStyle(
-                        fontSize: getPrefFontSize(),
-                        color: getFontColor(),
-                      ),
-                      textAlign: TextAlign.left,
-                    )));*/
-              });
-            }
-          } else {
-            pageComponents.add(Container(
-                alignment: Alignment.centerLeft,
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 7.5),
-                child: Text(
-                  element.data()['Text'].toString(),
-                  style: TextStyle(
-                    fontSize: getPrefFontSize(),
-                    color: getFontColor(),
-                  ),
-                  textAlign: TextAlign.left,
-                )));
-          }
-        });
-      });
-
-      return TableRow(children: rowChildren);*/
-    }).toList();
-
-    //return rows;
   }
 
   List<Widget> buildTableCell(
       BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
     List<Widget> cells = new List<Widget>();
-
-    print(snapshot.data.docs.length);
     return snapshot.data.docs.map((doc) {
-      print('CELL: ' + doc.id);
       if (doc.data().containsKey('Bullets')) {
-        print('BULLETS');
         //Create a piece of text for each bullet
         List<String> bulletList = new List<String>();
 
@@ -399,7 +300,6 @@ class _ReadingPageState extends State<ReadingPage> {
           );
         }
       } else {
-        print(doc.data()['Text'].toString());
         return (Container(
             alignment: Alignment.centerLeft,
             padding: EdgeInsets.symmetric(horizontal: 15, vertical: 7.5),
@@ -413,10 +313,6 @@ class _ReadingPageState extends State<ReadingPage> {
             )));
       }
     }).toList();
-
-    //print(cells.length);
-
-    //return cells;
   }
 
   Widget buildRichText(

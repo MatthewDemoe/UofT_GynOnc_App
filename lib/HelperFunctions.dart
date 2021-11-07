@@ -69,6 +69,33 @@ Future<Widget> getImage(String image) async {
   return img;
 }
 
+Future<Widget> getZoomableImage(String image) async {
+  PhotoView img;
+
+  await FirebaseStorage.instance
+      //The firebase storage instance
+      .ref()
+      //get the reference to the image
+      .child(image)
+      //Get the URL from the reference
+      .getDownloadURL()
+      //Get the actual image from the URL
+      .then((value) => img =  PhotoView(        
+        imageProvider:  Image.network(          
+            value.toString(),
+            
+            fit: BoxFit.scaleDown
+          ).image,
+          backgroundDecoration: BoxDecoration(color: getBackgroundColor()),
+          minScale: PhotoViewComputedScale.contained * 0.8,
+          maxScale: PhotoViewComputedScale.contained * 2.0,
+        ),);
+
+  return img;
+}
+
+
+
 //Build an image widget from database takes a string which should be the name of a file in firebase
 Widget buildImage(String image) {
   return FutureBuilder(
@@ -82,6 +109,33 @@ Widget buildImage(String image) {
 
         if (snapshot.connectionState == ConnectionState.done)
           return Container(
+              padding: EdgeInsets.all(10),
+              child: snapshot.hasData
+                  ? snapshot.data
+                  : CircularProgressIndicator());
+
+        return Container(
+          height: 110.0,
+          child: CircularProgressIndicator(),
+        );
+      });
+}
+
+Widget buildZoomableImage(String image) {
+  return FutureBuilder(
+      future: getZoomableImage(image),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting)
+          return Container(
+            height: 110.0,
+            constraints: BoxConstraints(maxHeight: 1000),
+            child: CircularProgressIndicator(),
+          );
+
+        if (snapshot.connectionState == ConnectionState.done)
+          return Container(
+              //width: MediaQuery.of(context).size.width,
+              height: 200.0,
               padding: EdgeInsets.all(10),
               child: snapshot.hasData
                   ? snapshot.data
@@ -151,6 +205,52 @@ Future<void> updateMark({String section, String mark}) async {
     print('NO DATA IN SNAPSHOT?');
   }
 }
+
+Future<void> updateTime({String section, int hours, int minutes}) async {
+  //The location of the section we care about
+  Stream<DocumentSnapshot> snap = FirebaseFirestore.instance
+      .collection('Users')
+      .doc(FirebaseAuth.instance.currentUser.email)
+      .collection('Evaluations')
+      .doc('Marks')
+      .collection('Modules')
+      .doc(section)
+      .snapshots();
+
+  StreamIterator<DocumentSnapshot> iterator =
+      StreamIterator<DocumentSnapshot>(snap);
+
+  if (await iterator.moveNext()) {
+    int previousHours = iterator.current.data().containsKey('Hours') ? iterator.current.data()['Hours'] : 0;
+    int previousMinutes = iterator.current.data().containsKey('Minutes') ? iterator.current.data()['Minutes'] : 0;
+
+    FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser.email)
+        .collection('Evaluations')
+        .doc('Marks')
+        .collection('Modules')
+        .doc(section)
+        .update(
+      {'Hours': hours + previousHours},
+    );
+
+    FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser.email)
+        .collection('Evaluations')
+        .doc('Marks')
+        .collection('Modules')
+        .doc(section)
+        .update(
+      {'Minutes': minutes + previousMinutes},
+    );
+
+  } else {
+    print('NO DATA IN SNAPSHOT?');
+  }
+}
+
 
 void setNewName({String firstName, String lastName}) {
   FirebaseFirestore.instance

@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => LoadingScreen(), //HomePage(title: "Home Page"),
+        '/': (context) => LoadingScreen(),
         '/HomePage': (context) => HomePage(title: 'Home Page'),
         '/video': (context) => VideoPage(title: "Video", id: '5yx6BWlEVcY'),
       },

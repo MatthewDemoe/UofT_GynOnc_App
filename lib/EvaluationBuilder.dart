@@ -12,12 +12,15 @@ import 'package:url_launcher/url_launcher.dart';
 import 'HelperFunctions.dart';
 
 class EvaluationBuilder extends StatefulWidget {
-  EvaluationBuilder({Key key, this.title, this.doc}) : super(key: key);
+  EvaluationBuilder({Key key, this.title, this.doc, this.pageNum, this.flipToPage}) : super(key: key);
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   final QueryDocumentSnapshot doc;
   final String title;
+  final int pageNum;
+  final Function(int) flipToPage;
+
 
   @override
   _EvaluationBuilderState createState() => _EvaluationBuilderState();
@@ -39,6 +42,8 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
   double percent = 0;
 
   Widget submitButton;
+  Widget homeButton;
+
   List<Widget> mark = new List<Widget>();
 
   List<int> evaluations = new List<int>();
@@ -85,7 +90,7 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
                       pinned: true, delegate: SliverTimerHeader(myTimer)),
                   SliverList(
                       delegate: SliverChildListDelegate(
-                          theWidgets + ((hideAnswers) ? [submitButton] : mark)))
+                          theWidgets + ((hideAnswers) ? [submitButton] : mark + [homeButton ])))
                 ])
               : buildStartPage();
         }));
@@ -100,14 +105,29 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
       //Count the correct answers
       correctAnswers += element;
     });
+
     //Calculate the percentage of correct answers
 
     setState(() {
       percent = (correctAnswers.toDouble() / theQuestions.length.toDouble());
-
-      //Stop hiding correct answers
+      
       hideAnswers = false;
     });
+
+    for(int i = 0; i < theWidgets.length; i++)
+    {
+      if(theWidgets[i] is Visibility)
+      {
+        setState(() {
+          Visibility visibilityWidget = theWidgets[i] as Visibility;
+
+          theWidgets[i] = new Visibility(
+            visible: !visibilityWidget.visible,
+            child: visibilityWidget.child,
+            );
+        });
+      }
+    }
 
     mark.add(new Container(
         alignment: Alignment.center,
@@ -159,6 +179,29 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
         ),
       );
     }
+    
+    homeButton = new Container(
+          padding: EdgeInsets.all(10),
+          height: 100,
+          width: 200,
+          child: RaisedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/HomePage');
+            },
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            color: getAppColor(),
+            child: Container(
+              padding: EdgeInsets.all(8),
+              child: Text(
+                'Home',
+                style: TextStyle(
+                    fontSize: 28 * getFontScale(), color: Colors.white),
+              ),
+            )));
+    
   }
 
   Future<bool> initializeTimer() async {
@@ -206,15 +249,38 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
 
     int counter = 0;
     while (await iterator.moveNext()) {
-      iterator.current.docs.forEach((element) {
+      List<QueryDocumentSnapshot> unshuffledQuestions = iterator.current.docs;
+      unshuffledQuestions.shuffle();
+      unshuffledQuestions.forEach((element) {
         counter++;
-
         //Create a question widget with the loaded question
         QuestionWidget tmp = QuestionWidget(
           doc: element,
           initialNum: counter,
           shouldShow: true,
         );
+
+        Visibility sectionButton = Visibility(
+          visible: !hideAnswers ? true : false,       
+          child: Container(
+            alignment: Alignment.center,
+            child: ElevatedButton(
+            style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(getAppColor()),),
+            
+            onPressed: () {
+              widget.flipToPage((element.data()["AnswerPage"] as int) - widget.pageNum);
+            },
+
+            child: Container(
+              child: Text("Found in " + element.data()["AnswerPageName"].toString(), 
+            style: TextStyle(
+              fontSize: 14 * getFontScale(),
+              color: Colors.white,
+            ),
+            ), 
+            ),),
+
+          ));
 
         //Create a new list item set to false for the new question
         evaluations.add(0);
@@ -226,6 +292,9 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
 
         theQuestions.add(tmp);
         theWidgets.add(tmp);
+
+        if(element.data()["AnswerPage"] != null)
+          theWidgets.add(sectionButton);
       });
     }
   }
@@ -234,19 +303,17 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
   Future<void> loadQuestionsGeneral() async {
     DocumentReference doc =
         FirebaseFirestore.instance.collection('Question Bank').doc('Questions');
-
     //Load the questions from each module, then choose some amount of them at random
     int counter = 0;
     doc.snapshots().forEach((element) {
       numQuestions = element.data()['Num Questions'];
+
       element.data().forEach((key, value) {
         if (value.runtimeType != int) {
           CollectionReference tmpCol =
               FirebaseFirestore.instance.collection(value);
           tmpCol.snapshots().forEach((quiz) {
             quiz.docs.forEach((e) {
-              counter++;
-
               allQuestions.add(QuestionWidget(
                 doc: e,
                 initialNum: counter,
@@ -295,8 +362,8 @@ class _EvaluationBuilderState extends State<EvaluationBuilder> {
             onPressed: () {
               myTimer.cancel();
 
-              //initialize the amount of correct answers
-              evaluateQuestions();
+              //initialize the amount of correct answers             
+              evaluateQuestions();   
             },
           ));
     });

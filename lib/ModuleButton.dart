@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'HelperFunctions.dart';
 import 'package:uoft_gynonc_app/ComponentDirector.dart';
+import 'HelperFunctions.dart';
 
 class ModuleButton extends StatelessWidget {
   ModuleButton({this.doc});
@@ -107,7 +108,7 @@ class ModuleButton extends StatelessWidget {
         //When we click the module button, we want to start exploring the contents
         //ComponentDirector handles moving between different module components
         onPressed: () {
-          Navigator.push(
+            Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => ComponentDirector(
